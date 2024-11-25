@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { fetchUserLogin } from "../features/authSlide";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AdminLogin = () => {
     const [username, setUsername] = useState("");
@@ -17,6 +18,7 @@ const AdminLogin = () => {
                 console.log("Login success");
                 navigate("/admin");
             } else {
+                toast.error("Tài khoản hoặc mật khẩu không đúng!");
                 console.log("Login failed");
             }
         } catch (error) {

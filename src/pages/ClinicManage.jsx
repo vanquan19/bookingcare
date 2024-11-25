@@ -11,6 +11,10 @@ import { useSelector } from "react-redux";
 import { getData, setData } from "../utils/fetchData";
 import { toast, useToast } from "react-toastify";
 import { LIMIT } from "../configs/constance";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { Star } from "../components/Star";
+import { LuMail, LuMapPin, LuPhone, LuType, LuUser } from "react-icons/lu";
 
 const ClinicManageContainer = () => {
     const sidebarList = [
@@ -41,6 +45,7 @@ export const Clinicmanagement = () => {
     const [isOpenAddNewClinic, setIsOpenAddNewNlinic] = useState(false);
     const [isOpenEditClinic, setIsOpenEditClinic] = useState(false);
     const [isOpenAlertDelete, setIsOpenAlertDelete] = useState(false);
+    const [isOpenViewClinic, setIsOpenViewClinic] = useState(false);
     const [rowData, setRowData] = useState([]);
     const [iClinic, setIClinic] = useState(0);
     const [iPublicClinic, setIPublicClinic] = useState(0);
@@ -59,7 +64,7 @@ export const Clinicmanagement = () => {
     useEffect(() => {
         const fetchData = async () => {
             const response = await getData(`/clinic/number`);
-            if (!response.success) {
+            if (!response.isSuccess) {
                 console.log(response.message);
                 toast.error(response.message);
                 return;
@@ -73,22 +78,8 @@ export const Clinicmanagement = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getData(`/clinic/read?id=all&page=${page}&limit=${LIMIT}&sort=${sort}`);
-            if (!response.success) {
-                console.log(response.message);
-                return;
-            }
-            setTotalPages(response.totalPages);
-            setRowData(response.data);
-        };
-        fetchData();
-    }, [page, load]);
-
-    //sort
-    useEffect(() => {
-        const fetchData = async () => {
             const response = await getData(`/clinic/read?id=all&page=${page}&limit=${LIMIT}&sort=${sort}&search=${debouncedQuery}`);
-            if (!response.success) {
+            if (!response.isSuccess) {
                 console.log(response.message);
                 return;
             }
@@ -96,7 +87,7 @@ export const Clinicmanagement = () => {
             setRowData(response.data);
         };
         fetchData();
-    }, [sort]);
+    }, [sort, page, load, debouncedQuery]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -106,19 +97,6 @@ export const Clinicmanagement = () => {
             clearTimeout(timer);
         };
     }, [search]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const response = await getData(`/clinic/read?id=all&page=${page}&limit=${LIMIT}&sort=${sort}&search=${debouncedQuery}`);
-            if (!response.success) {
-                console.log(response.message);
-                return;
-            }
-            setTotalPages(response.totalPages);
-            setRowData(response.data);
-        };
-        fetchData();
-    }, [debouncedQuery]);
 
     const handlePublish = async (e, clinic) => {
         const accessToken = auth.accessToken;
@@ -138,6 +116,11 @@ export const Clinicmanagement = () => {
     const handleDeleteClinic = (clinic) => {
         setClinicTarget(clinic);
         setIsOpenAlertDelete(true);
+    };
+
+    const handleViewClinic = (clinic) => {
+        setClinicTarget(clinic);
+        setIsOpenViewClinic(true);
     };
 
     return (
@@ -249,7 +232,9 @@ export const Clinicmanagement = () => {
                                             <button className="text-white hover:bg-gray-200 transition-all px-2 py-2 outline-none rounded relative group">
                                                 <IoMdMore />
                                                 <div className="absolute top-full hidden group-hover:flex shadow rounded -right-2 z-20 p-3 min-w-32 flex-col bg-white gap-2 animate-fadeIn transition-all">
-                                                    <button className="text-primary-2 px-2 py-1 hover:bg-gray-200 outline-none rounded flex items-center gap-3 justify-center">
+                                                    <button
+                                                        onClick={() => handleViewClinic(clinic)}
+                                                        className="text-primary-2 px-2 py-1 hover:bg-gray-200 outline-none rounded flex items-center gap-3 justify-center">
                                                         <CiViewBoard className="fill-primary-2" /> Xem
                                                     </button>
                                                     <button
@@ -295,13 +280,27 @@ export const Clinicmanagement = () => {
             }
             {
                 //edit clinic
-                isOpenEditClinic && <ModalEditClinic rowData={rowData} setRowData={setRowData} isOpenEditClinic={isOpenEditClinic} setIsOpenEditClinic={setIsOpenEditClinic} clinic={clinicTarget} />
+                isOpenEditClinic && (
+                    <ModalEditClinic
+                        load={load}
+                        setLoad={setLoad}
+                        rowData={rowData}
+                        setRowData={setRowData}
+                        isOpenEditClinic={isOpenEditClinic}
+                        setIsOpenEditClinic={setIsOpenEditClinic}
+                        clinic={clinicTarget}
+                    />
+                )
             }
             {
                 //delete clinic
                 isOpenAlertDelete && (
                     <ModalAlertDelete load={load} setLoad={setLoad} isOpenAlertDelete={isOpenAlertDelete} setIsOpenAlertDelete={setIsOpenAlertDelete} id={clinicTarget.id} name={clinicTarget.name} />
                 )
+            }
+            {
+                //view clinic
+                isOpenViewClinic && <ModalViewClinic isOpenViewClinic={isOpenViewClinic} setIsOpenViewClinic={setIsOpenViewClinic} clinic={clinicTarget} />
             }
         </>
     );
@@ -317,6 +316,9 @@ const ModalAddNewClinic = ({ isOpenAddNewClinic, setIsOpenAddNewNlinic, load, se
     const [clinicEmail, setClinicEmail] = useState("");
     const [clinicType, setClinicType] = useState("");
     const [description, setDescription] = useState("");
+    const [content, setContent] = useState("");
+    const [firstname, setFirstname] = useState("");
+    const [lastname, setLastname] = useState("");
     const [listType, setListType] = useState([]);
     const [errors, setErrors] = useState({
         clinicName: "",
@@ -325,6 +327,8 @@ const ModalAddNewClinic = ({ isOpenAddNewClinic, setIsOpenAddNewNlinic, load, se
         clinicEmail: "",
         clinicType: "",
         image: "",
+        firstname: "",
+        lastname: "",
     });
     const selector = useSelector((state) => state.auth);
     const navigate = useNavigate();
@@ -340,6 +344,12 @@ const ModalAddNewClinic = ({ isOpenAddNewClinic, setIsOpenAddNewNlinic, load, se
 
         if (!Validate.validateName(clinicName)) {
             validationErrors.clinicName = "Tên phòng khám không được để trống";
+        }
+        if (!Validate.validateName(firstname)) {
+            validationErrors.firstname = "Tên đăng ký không được để trống";
+        }
+        if (!Validate.validateName(lastname)) {
+            validationErrors.lastname = "Tên đăng ký không được để trống";
         }
         if (!Validate.validatePhone(clinicPhone)) {
             validationErrors.clinicPhone = "Số điện thoại không hợp lệ";
@@ -367,6 +377,9 @@ const ModalAddNewClinic = ({ isOpenAddNewClinic, setIsOpenAddNewNlinic, load, se
             email: clinicEmail,
             type: clinicType,
             description: description,
+            content: content,
+            firstname: firstname,
+            lastname: lastname,
         };
 
         //fetch data
@@ -423,21 +436,38 @@ const ModalAddNewClinic = ({ isOpenAddNewClinic, setIsOpenAddNewNlinic, load, se
                                 <span className="text-red-300 text-sm absolute top-full">{errors.clinicName}</span>
                             </div>
                             <div className="flex flex-col gap-2 relative mb-2">
-                                <label htmlFor="clinic-phone" className="text-sm text-gray-600">
-                                    Số điện thoại <span className="text-red-300">*</span>
+                                <label htmlFor="clinic-address" className="text-sm text-gray-600">
+                                    Địa chỉ <span className="text-red-300">*</span>
                                 </label>
-                                <input type="text" id="clinic-phone" className="border border-gray-300 rounded px-2 py-2 outline-none" onChange={(e) => setClinicPhone(e.target.value)} />
-                                <span className="text-red-300 text-sm absolute top-full">{errors.clinicPhone}</span>
+                                <input type="text" id="clinic-address" className="border border-gray-300 rounded px-2 py-2 outline-none" onChange={(e) => setClinicAddress(e.target.value)} />
+                                <span className="text-red-300 text-sm absolute top-full">{errors.clinicAddress}</span>
                             </div>
                         </div>
                     </div>
-                    <div className="flex flex-col gap-2 relative mb-2">
-                        <label htmlFor="clinic-address" className="text-sm text-gray-600">
-                            Địa chỉ <span className="text-red-300">*</span>
-                        </label>
-                        <input type="text" id="clinic-address" className="border border-gray-300 rounded px-2 py-2 outline-none" onChange={(e) => setClinicAddress(e.target.value)} />
-                        <span className="text-red-300 text-sm absolute top-full">{errors.clinicAddress}</span>
+                    <div className="flex justify-between gap-2">
+                        <div className="flex flex-col gap-2 relative w-full">
+                            <label htmlFor="manager-firstname" className="text-sm text-gray-600">
+                                Họ <span className="text-red-300">*</span>
+                            </label>
+                            <input type="text" id="manager-firstname" className="border border-gray-300 rounded px-2 py-2 outline-none" onChange={(e) => setFirstname(e.target.value)} />
+                            <span className="text-red-300 text-sm absolute top-full">{errors.firstname}</span>
+                        </div>
+                        <div className="flex flex-col gap-2 relative w-full">
+                            <label htmlFor="manager-lastname" className="text-sm text-gray-600">
+                                Tên <span className="text-red-300">*</span>
+                            </label>
+                            <input type="text" id="manager-lastname" className="border border-gray-300 rounded px-2 py-2 outline-none" onChange={(e) => setLastname(e.target.value)} />
+                            <span className="text-red-300 text-sm absolute top-full">{errors.lastname}</span>
+                        </div>
                     </div>
+                    <div className="flex flex-col gap-2 relative mb-2">
+                        <label htmlFor="clinic-phone" className="text-sm text-gray-600">
+                            Số điện thoại <span className="text-red-300">*</span>
+                        </label>
+                        <input type="text" id="clinic-phone" className="border border-gray-300 rounded px-2 py-2 outline-none" onChange={(e) => setClinicPhone(e.target.value)} />
+                        <span className="text-red-300 text-sm absolute top-full">{errors.clinicPhone}</span>
+                    </div>
+
                     <div className="flex flex-col gap-2 relative mb-2">
                         <label htmlFor="clinic-email" className="text-sm text-gray-600">
                             Email <span className="text-red-300">*</span>
@@ -460,16 +490,22 @@ const ModalAddNewClinic = ({ isOpenAddNewClinic, setIsOpenAddNewNlinic, load, se
                         <span className="text-red-300 text-sm absolute top-full">{errors.clinicType}</span>
                     </div>
                     <div className="flex flex-col gap-2 relative mb-2">
-                        <label htmlFor="clinic-description" className="text-sm text-gray-600">
+                        <label htmlFor="clinic-short-description" className="text-sm text-gray-600">
                             Mô tả
                         </label>
                         <textarea
                             name=""
-                            id="clinic-description"
+                            id="clinic-short-description"
                             cols="30"
-                            rows="10"
+                            rows="3"
                             className="border border-gray-300 rounded px-2 py-2 outline-none"
                             onChange={(e) => setDescription(e.target.value)}></textarea>
+                    </div>
+                    <div className="flex flex-col gap-2 relative mb-2">
+                        <label htmlFor="clinic-content" className="text-sm text-gray-600">
+                            Mô tả
+                        </label>
+                        <ReactQuill id="clinic-content" theme="snow" value={content} onChange={setContent} />
                     </div>
                 </form>
 
@@ -494,14 +530,18 @@ const ModalAddNewClinic = ({ isOpenAddNewClinic, setIsOpenAddNewNlinic, load, se
     );
 };
 
-const ModalEditClinic = ({ isOpenEditClinic, setIsOpenEditClinic, clinic, setRowData, rowData }) => {
+const ModalEditClinic = ({ isOpenEditClinic, setIsOpenEditClinic, clinic, setRowData, rowData, setLoad, load }) => {
     const [image, setImage] = useState(clinic.image);
     const [clinicName, setClinicName] = useState(clinic.name);
     const [clinicPhone, setClinicPhone] = useState(clinic.phone);
     const [clinicAddress, setClinicAddress] = useState(clinic.address);
     const [clinicEmail, setClinicEmail] = useState(clinic.email);
     const [clinicType, setClinicType] = useState(clinic.id_type);
+    const [clinicTypeText, setClinicTypeText] = useState(clinic.type);
     const [description, setDescription] = useState(clinic.description);
+    const [content, setContent] = useState(clinic.content);
+    const [firstname, setFirstname] = useState(clinic.firstname);
+    const [lastname, setLastname] = useState(clinic.lastname);
     const [listType, setListType] = useState([]);
     const [errors, setErrors] = useState({
         clinicName: "",
@@ -510,6 +550,8 @@ const ModalEditClinic = ({ isOpenEditClinic, setIsOpenEditClinic, clinic, setRow
         clinicEmail: "",
         clinicType: "",
         image: "",
+        firstname: "",
+        lastname: "",
     });
     const selector = useSelector((state) => state.auth);
     const navigate = useNavigate();
@@ -529,6 +571,12 @@ const ModalEditClinic = ({ isOpenEditClinic, setIsOpenEditClinic, clinic, setRow
         }
         if (!Validate.validatePhone(clinicPhone)) {
             validationErrors.clinicPhone = "Số điện thoại không hợp lệ";
+        }
+        if (!Validate.validateName(firstname)) {
+            validationErrors.firstname = "Tên đăng ký không được để trống";
+        }
+        if (!Validate.validateName(lastname)) {
+            validationErrors.lastname = "Tên đăng ký không được để trống";
         }
         if (!Validate.validateEmail(clinicEmail)) {
             validationErrors.clinicEmail = "Email không hợp lệ";
@@ -552,7 +600,10 @@ const ModalEditClinic = ({ isOpenEditClinic, setIsOpenEditClinic, clinic, setRow
             clinicEmail === clinic.email &&
             clinicType === clinic.id_type &&
             description === clinic.description &&
-            image === clinic.image
+            image === clinic.image &&
+            firstname === clinic.firstname &&
+            lastname === clinic.lastname &&
+            content === clinic.content
         ) {
             toast.info("Không có gì thay đổi!");
             setIsOpenEditClinic(false);
@@ -568,23 +619,20 @@ const ModalEditClinic = ({ isOpenEditClinic, setIsOpenEditClinic, clinic, setRow
             email: clinicEmail,
             type: clinicType,
             description: description,
+            content: content,
+            firstname: firstname,
+            lastname: lastname,
         };
 
         //fetch data
         const response = await setData("/clinic/update", "PUT", data, "application/json", selector.accessToken);
-        if (!response.success) {
+        if (!response.isSuccess) {
             console.log(response.message);
             toast.error(response.message);
         }
         toast.success("Thông tin đã được cập nhật!");
         setIsOpenEditClinic(false);
-        const newData = rowData.map((item) => {
-            if (item.id === clinic.id) {
-                return { ...data };
-            }
-            return item;
-        });
-        setRowData(newData);
+        setLoad(!load);
     };
 
     return (
@@ -639,39 +687,61 @@ const ModalEditClinic = ({ isOpenEditClinic, setIsOpenEditClinic, clinic, setRow
 
                                 <span className="text-red-300 text-sm absolute top-full">{errors.clinicName}</span>
                             </div>
-
                             <div className="flex flex-col gap-2 relative mb-2">
-                                <label htmlFor="clinic-phone" className="text-sm text-gray-600">
-                                    Số điện thoại <span className="text-red-300">*</span>
+                                <label htmlFor="clinic-address" className="text-sm text-gray-600">
+                                    Địa chỉ <span className="text-red-300">*</span>
                                 </label>
 
                                 <input
                                     type="text"
-                                    id="clinic-phone"
-                                    defaultValue={clinicPhone}
+                                    defaultValue={clinicAddress}
+                                    id="clinic-address"
                                     className="border border-gray-300 rounded px-2 py-2 outline-none"
-                                    onChange={(e) => setClinicPhone(e.target.value)}
+                                    onChange={(e) => setClinicAddress(e.target.value)}
                                 />
 
-                                <span className="text-red-300 text-sm absolute top-full">{errors.clinicPhone}</span>
+                                <span className="text-red-300 text-sm absolute top-full">{errors.clinicAddress}</span>
                             </div>
                         </div>
                     </div>
 
+                    <div className="flex justify-between gap-2">
+                        <div className="flex flex-col gap-2 relative w-full">
+                            <label htmlFor="manager-firstname" className="text-sm text-gray-600">
+                                Họ <span className="text-red-300">*</span>
+                            </label>
+                            <input
+                                value={firstname}
+                                type="text"
+                                id="manager-firstname"
+                                className="border border-gray-300 rounded px-2 py-2 outline-none"
+                                onChange={(e) => setFirstname(e.target.value)}
+                            />
+                            <span className="text-red-300 text-sm absolute top-full">{errors.firstname}</span>
+                        </div>
+                        <div className="flex flex-col gap-2 relative w-full">
+                            <label htmlFor="manager-lastname" className="text-sm text-gray-600">
+                                Tên <span className="text-red-300">*</span>
+                            </label>
+                            <input value={lastname} type="text" id="manager-lastname" className="border border-gray-300 rounded px-2 py-2 outline-none" onChange={(e) => setLastname(e.target.value)} />
+                            <span className="text-red-300 text-sm absolute top-full">{errors.lastname}</span>
+                        </div>
+                    </div>
+
                     <div className="flex flex-col gap-2 relative mb-2">
-                        <label htmlFor="clinic-address" className="text-sm text-gray-600">
-                            Địa chỉ <span className="text-red-300">*</span>
+                        <label htmlFor="clinic-phone" className="text-sm text-gray-600">
+                            Số điện thoại <span className="text-red-300">*</span>
                         </label>
 
                         <input
                             type="text"
-                            defaultValue={clinicAddress}
-                            id="clinic-address"
+                            id="clinic-phone"
+                            defaultValue={clinicPhone}
                             className="border border-gray-300 rounded px-2 py-2 outline-none"
-                            onChange={(e) => setClinicAddress(e.target.value)}
+                            onChange={(e) => setClinicPhone(e.target.value)}
                         />
 
-                        <span className="text-red-300 text-sm absolute top-full">{errors.clinicAddress}</span>
+                        <span className="text-red-300 text-sm absolute top-full">{errors.clinicPhone}</span>
                     </div>
 
                     <div className="flex flex-col gap-2 relative mb-2">
@@ -695,7 +765,15 @@ const ModalEditClinic = ({ isOpenEditClinic, setIsOpenEditClinic, clinic, setRow
                             Loại phòng khám <span className="text-red-300">*</span>
                         </label>
 
-                        <select value={clinicType} name="" id="clinic-type" className="border border-gray-300 rounded px-2 py-2 outline-none" onChange={(e) => setClinicType(e.target.value)}>
+                        <select
+                            value={clinicType}
+                            name=""
+                            id="clinic-type"
+                            className="border border-gray-300 rounded px-2 py-2 outline-none"
+                            onChange={(e) => {
+                                setClinicType(e.target.value);
+                                setClinicTypeText(e.target.options[e.target.selectedIndex].text);
+                            }}>
                             <option value="">Chọn loại phòng khám</option>
 
                             {listType.map((item) => (
@@ -710,17 +788,23 @@ const ModalEditClinic = ({ isOpenEditClinic, setIsOpenEditClinic, clinic, setRow
 
                     <div className="flex flex-col gap-2 relative mb-2">
                         <label htmlFor="clinic-description" className="text-sm text-gray-600">
-                            Mô tả
+                            Mô tả ngắn
                         </label>
 
                         <textarea
                             name=""
                             id="clinic-description"
                             cols="30"
-                            rows="10"
+                            rows="4"
                             defaultValue={clinic.description}
                             className="border border-gray-300 rounded px-2 py-2 outline-none"
                             onChange={(e) => setDescription(e.target.value)}></textarea>
+                    </div>
+                    <div className="flex flex-col gap-2 relative mb-2">
+                        <label htmlFor="clinic-content" className="text-sm text-gray-600">
+                            Nội dung
+                        </label>
+                        <ReactQuill id="clinic-content" theme="snow" value={content} onChange={setContent} />
                     </div>
                 </form>
 
@@ -750,7 +834,7 @@ const ModalAlertDelete = ({ isOpenAlertDelete, setIsOpenAlertDelete, id, name, s
     const selector = useSelector((state) => state.auth);
     const handleDelete = async () => {
         const response = await setData(`/clinic/delete?id=${id}&name=${name}`, "DELETE", null, "application/json", selector.accessToken);
-        if (!response.success) {
+        if (!response.isSuccess) {
             toast.error(response.message);
             return;
         }
@@ -787,4 +871,71 @@ const ModalAlertDelete = ({ isOpenAlertDelete, setIsOpenAlertDelete, id, name, s
     );
 };
 
+const ModalViewClinic = ({ clinic, setIsOpenViewClinic }) => {
+    return (
+        <div>
+            <div className="fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-gray-400/5 bg-opacity-5  backdrop-blur-sm transition-opacity duration-300">
+                <div className="relative m-4 p-4 w-4/5 min-w-[40%] max-w-[80%] rounded-lg bg-white shadow-sm animate-fadeIn transition-all duration-300">
+                    <button onClick={() => setIsOpenViewClinic(false)} className="text-xl font-semibold float-end mr-4">
+                        x
+                    </button>
+                    <div className="flex flex-col gap-4 ">
+                        <div className="text-gray-600 flex pr-4 text-justify gap-8 ">
+                            <div className="w-1/3 h-[90vh] overflow-y-scroll no-scrollbar">
+                                <div className="flex flex-col gap-4 items-center">
+                                    <img className="h-32 w-32 rounded-[100%] object-cover " src={clinic.image} alt="ảnh đại diện phòng khám" />
+                                    <div className="text-center flex flex-col items-center">
+                                        <div className="text-xl font-semibold text-primary">{clinic.name}</div>
+                                        <div className="flex items-center gap-2 text-yellow-500 font-bold">
+                                            ({clinic.star})
+                                            <Star star={clinic.star} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr className="my-4" />
+                                <div className="flex flex-col gap-2 mt-4">
+                                    <div className="flex gap-2 items-center">
+                                        <span className="font-semibold">
+                                            <LuMapPin className=" stroke-orange-200" />
+                                        </span>
+                                        <span className="text-base">{clinic.address}</span>
+                                    </div>
+                                    <div className="flex gap-2 items-center">
+                                        <span className="font-semibold">
+                                            <LuPhone className=" stroke-orange-200" />
+                                        </span>
+                                        <span className="text-base">{clinic.phone}</span>
+                                    </div>
+                                    <div className="flex gap-2 items-center">
+                                        <span className="font-semibold">
+                                            <LuMail className=" stroke-orange-200" />
+                                        </span>
+                                        <span className="text-base">{clinic.email}</span>
+                                    </div>
+                                    <div className="flex gap-2 items-center">
+                                        <span className="font-semibold">
+                                            <LuUser className=" stroke-orange-200" />
+                                        </span>
+                                        <span className="text-base">{clinic.firstname + " " + clinic.lastname}</span>
+                                    </div>
+                                    <div className="flex gap-2 items-center">
+                                        <span className="font-semibold">
+                                            <LuType className=" stroke-orange-200" />
+                                        </span>
+                                        <span className="text-base">{clinic.type}</span>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <div className="text-lg font-semibold text-primary">Mô tả</div>
+                                    <div className="text-justify">{clinic.description}</div>
+                                </div>
+                            </div>
+                            <div className="w-2/3 h-[90vh] overflow-y-scroll no-scrollbar" dangerouslySetInnerHTML={{ __html: clinic.content }} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 export default ClinicManageContainer;

@@ -9,7 +9,9 @@ import { Link } from "react-router-dom";
 import { FaStar, FaUser } from "react-icons/fa";
 import { CiMedicalClipboard, CiMedicalCross, CiWallet } from "react-icons/ci";
 import { IoCalendarOutline } from "react-icons/io5";
+import { getData } from "../utils/fetchData";
 
+//bỏ đi
 const ListMedicalServices = () => {
     const [indexPage, setIndexPage] = useState(0);
     const medicalServices = [
@@ -55,6 +57,18 @@ const ListMedicalServices = () => {
         },
     ];
     const options = ["Tất cả", "Bệnh viện", "Phòng khám/Phòng mạch/Xét nghiệm/Khác"];
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getData("/clinic/read-follow-type");
+                console.log(data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchData();
+    }, []);
 
     return (
         <>
@@ -166,41 +180,40 @@ const ListDoctorService = () => {
             },
         },
     ];
-
+    const [doctors, setDoctors] = useState([]);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getData("/doctor/read-public");
+                setDoctors(data?.data || []);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchData();
+    }, []);
     return (
         <>
             <div className="w-1/2">
                 <SearchInput size="lg" placeholder="Tìm kiếm bác sĩ" className="" rounded="lg" />
             </div>
-            <ul className="flex gap-4 justify-center mb-4  py-4  px-16">
-                {options.map((option, index) => (
-                    <Link key={index} href="#">
-                        <li
-                            key={index}
-                            className={`py-3 w-48 text-center   text-lg font-semibold rounded-full ${
-                                index === indexPage ? "bg-primary-2 text-white" : "bg-white text-primary-2 transition-all"
-                            } hover:bg-primary-2 hover:text-white `}>
-                            {option}
-                        </li>
-                    </Link>
-                ))}
-            </ul>
-            <div className="flex justify-between gap-4 w-3/4">
+
+            <div className="flex justify-between gap-4 w-3/4 mt-4">
                 <ul className="grid grid-cols-1 gap-4 w-full">
-                    {doctorServices.map((doctor, index) => (
+                    {doctors.map((doctor, index) => (
                         <li key={doctor.id}>
                             <div className="border-2 border-transparent rounded-2xl overflow-hidden hover:border-primary  md:cursor-pointer shadow-md  transition-all">
                                 <div className={`flex gap-4  bg-white p-4 `}>
                                     <div className="min-w-32 overflow-hidden p-2">
-                                        <img src={doctor.image} />
+                                        <img src={doctor.image} className="h-32" />
                                     </div>
                                     <div className="w-full flex flex-col gap-1">
                                         <Heading3>
-                                            {doctor.position} {doctor.name}
+                                            Bác sĩ {doctor.firstname} {doctor.lastname}
                                         </Heading3>
                                         <div className="flex gap-2 text-lg items-center">
                                             <span className="font-semibold">Chuyên trị:</span>
-                                            <Paragraph>{doctor.specialize}</Paragraph>
+                                            <Paragraph>{doctor.specialtyName}</Paragraph>
                                         </div>
                                         <div className="flex gap-2 text-lg">
                                             <span className="font-semibold">Lịch khám:</span>
@@ -208,24 +221,31 @@ const ListDoctorService = () => {
                                         </div>
                                         <div className="flex gap-2 text-lg">
                                             <span className="font-semibold">Giá Khám:</span>
-                                            <Paragraph>{doctor.price}Đ</Paragraph>
+                                            <Paragraph>
+                                                {doctor.price
+                                                    .toString()
+                                                    .replace(/\D/g, "")
+                                                    .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                                                đ
+                                            </Paragraph>
                                         </div>
                                     </div>
                                 </div>
-                                <GroupButton className="bg-gray-400 p-3 justify-between">
+                                <GroupButton className="bg-gray-400 p-3 justify-between items-center">
                                     <div className="">
-                                        <Paragraph>{doctor.clinic.name}</Paragraph>
+                                        <Paragraph> {doctor.clinicName}</Paragraph>
                                         <div className="flex gap-1 items-center">
                                             <LuMapPin />
-                                            <Paragraph>{doctor.clinic.address}</Paragraph>
+                                            <Paragraph>{doctor.clinicAddress}</Paragraph>
                                         </div>
                                     </div>
-
-                                    <Button
-                                        size="sm"
-                                        className="bg-gradient-to-r font-semibold from-primary-2 to-primary hover:from-primary-3 hover:to-primary-2 transition-all text-white w-48 rounded-full">
-                                        Đặt lịch
-                                    </Button>
+                                    <Link>
+                                        <Button
+                                            size="sm"
+                                            className="bg-gradient-to-r font-semibold from-primary-2 to-primary hover:from-primary-3 hover:to-primary-2 transition-all text-white w-48 rounded-full">
+                                            Đặt lịch
+                                        </Button>
+                                    </Link>
                                 </GroupButton>
                             </div>
                         </li>

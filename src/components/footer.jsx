@@ -10,7 +10,7 @@ const Footer = () => {
                     <div className="h-20 object-cover flex items-center">
                         <img src={logo} alt="logo" className="h-56 z-0" />
                     </div>
-                    <p className="text-gray-500">MedPro - Ứng dụng đặt lịch khám bệnh trực tuyến</p>
+                    <p className="text-gray-500">Booking - Ứng dụng đặt lịch khám bệnh trực tuyến</p>
                     <ul>
                         <li>
                             <span className="font-semibold">Địa chỉ:</span> Viet Nam
@@ -151,7 +151,7 @@ const Footer = () => {
                 </div>
             </div>
             <div className="bg-primary text-white text-center py-2">
-                <p>© 2021 MedPro. All rights reserved</p>
+                <p>© 2024 BOKING. All rights reserved</p>
             </div>
         </footer>
     );

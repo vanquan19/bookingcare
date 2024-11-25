@@ -61,7 +61,7 @@ const HomePage = () => {
             </div>
             <div>
                 <Banner2 />
-                <DownLoadApp />
+                {/* <DownLoadApp /> */}
                 <MediaTalkAbout />
                 <NewsList news={news} />
             </div>

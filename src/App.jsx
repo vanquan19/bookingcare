@@ -28,6 +28,16 @@ import ProtectedRoute from "./utils/ProtectedRoute.jsx";
 import "react-toastify/dist/ReactToastify.css";
 import DoctorContainer from "./pages/DoctorContainer.jsx";
 import DoctorLogin from "./pages/DoctorLogin.jsx";
+import { ListDoctor, ListMedicalPakage, ListSpecialty, MedicalBookingForm, SelectPatientProfile } from "./components/MedicalComponents.jsx";
+import DoctorManageSpecialty from "./pages/DoctorManageSpecialty.jsx";
+import DoctorManagePakage from "./pages/DoctorManagePakage.jsx";
+import DoctorManageSchedule from "./pages/DoctorManageSchedule.jsx";
+import DoctorManagePatient from "./pages/DoctorManagePatient.jsx";
+import DoctorManageStaff from "./pages/DoctorManageStaff.jsx";
+import DoctorChat from "./pages/DoctorChat.jsx";
+import DoctorAnalysis from "./pages/DoctorAnalysis.jsx";
+import ViewDetailClinic from "./pages/ViewDetailClinic.jsx";
+import AddNewProfilePatient from "./pages/AddNewProfilePatient.jsx";
 
 const router = createBrowserRouter([
     {
@@ -38,6 +48,14 @@ const router = createBrowserRouter([
                 path: "/",
                 index: true,
                 element: <HomePage />,
+            },
+            {
+                path: "them-ho-so-benh-nhan",
+                element: <ProtectedRoute component={AddNewProfilePatient} navigate="/" />,
+            },
+            {
+                path: "chi-tiet-phong-kham",
+                element: <ViewDetailClinic />,
             },
             {
                 path: "co-so-y-te",
@@ -76,11 +94,6 @@ const router = createBrowserRouter([
                 element: <MedicalService />,
                 children: [
                     {
-                        path: "dat-kham-tai-co-so",
-                        index: true,
-                        element: <ListMedicalServices />,
-                    },
-                    {
                         path: "dat-kham-theo-bac-si",
                         element: <ListDoctorService />,
                     },
@@ -109,6 +122,26 @@ const router = createBrowserRouter([
                         element: <PaymentOfHospitalFees />,
                     },
                 ],
+            },
+            {
+                path: "hinh-thuc-dat-kham",
+                element: <MedicalBookingForm />,
+            },
+            {
+                path: "chon-ho-so",
+                element: <SelectPatientProfile />,
+            },
+            {
+                path: "dat-kham-theo-chuyen-khoa",
+                element: <ListSpecialty />,
+            },
+            {
+                path: "dat-kham-theo-bac-si",
+                element: <ListDoctor />,
+            },
+            {
+                path: "dat-kham-theo-goi-kham",
+                element: <ListMedicalPakage />,
             },
             {
                 path: "kham-suc-khoe-doanh-nghiep",
@@ -219,6 +252,36 @@ const router = createBrowserRouter([
     {
         path: "/doctor",
         element: <ProtectedRoute component={DoctorContainer} navigate="/doctor/login" />,
+        children: [
+            {
+                index: true,
+                element: <DoctorAnalysis />,
+            },
+            {
+                path: "schedule",
+                element: <DoctorManageSchedule />,
+            },
+            {
+                path: "chat",
+                element: <DoctorChat />,
+            },
+            {
+                path: "specialty",
+                element: <DoctorManageSpecialty />,
+            },
+            {
+                path: "package",
+                element: <DoctorManagePakage />,
+            },
+            {
+                path: "staff",
+                element: <DoctorManageStaff />,
+            },
+            {
+                path: "patient",
+                element: <DoctorManagePatient />,
+            },
+        ],
     },
     {
         path: "/doctor/login",

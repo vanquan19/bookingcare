@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import fetchData from "../utils/fetchData.js";
+import fetchData, { setData } from "../utils/fetchData.js";
 
 export const fetchUserLogin = createAsyncThunk("login", async (data, thunkAPI) => {
     console.log(data);
@@ -18,6 +18,13 @@ export const fetchUserLogin = createAsyncThunk("login", async (data, thunkAPI) =
     fromData.append("password", data.password);
     fromData.append("role", data.role);
     const response = await fetchData("/admin/login", "POST", fromData, "application/x-www-form-urlencoded");
+    console.log(response);
+
+    return response;
+});
+
+export const fetchUserRegister = createAsyncThunk("register", async (data, thunkAPI) => {
+    const response = await setData("/create-patient", "POST", data);
     return response;
 });
 
@@ -43,6 +50,13 @@ export const authReducer = createSlice({
             state.refreshToken = "";
             state.message = "";
         },
+        patientLogin(state, action) {
+            state.isAuthenticated = action.payload.isSuccess;
+            state.data = action.payload.data;
+            state.accessToken = action.payload.accessToken;
+            state.refreshToken = action.payload.refreshToken;
+            state.message = action.payload.message;
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(fetchUserLogin.fulfilled, (state, action) => {
@@ -54,7 +68,17 @@ export const authReducer = createSlice({
             if (action.payload.refreshToken) state.refreshToken = action.payload.refreshToken;
             console.log("ckech state after login", state);
         });
+        builder.addCase(fetchUserRegister.fulfilled, (state, action) => {
+            console.log(action.payload);
+
+            state.isAuthenticated = action.payload.isSuccess;
+            state.message = action.payload.message;
+            if (action.payload.data) state.data = action.payload.data;
+            if (action.payload.accessToken) state.accessToken = action.payload.accessToken;
+            if (action.payload.refreshToken) state.refreshToken = action.payload.refreshToken;
+            console.log("ckech state after register", state);
+        });
     },
 });
-export const { login, logout } = authReducer.actions;
+export const { login, logout, patientLogin } = authReducer.actions;
 export default authReducer.reducer;

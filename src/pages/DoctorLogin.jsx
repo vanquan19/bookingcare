@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { fetchUserLogin } from "../features/authSlide";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const DoctorLogin = () => {
     const [username, setUsername] = useState("");
@@ -15,9 +16,10 @@ const DoctorLogin = () => {
             const resultAction = await dispatch(fetchUserLogin({ username, password, role: "doctor" })).unwrap();
             if (resultAction.isSuccess) {
                 console.log("Login success");
-                navigate("/admin");
+                navigate("/doctor");
             } else {
                 console.log("Login failed");
+                toast.error(resultAction.message);
             }
         } catch (error) {
             console.log(error);

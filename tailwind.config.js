@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+
 export default {
-    content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+    content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}", "./node_modules/react-tailwindcss-datepicker/dist/index.esm.js"],
     theme: {
         colors: {
             transparent: "transparent",
@@ -87,6 +88,8 @@ export default {
                 fadeIn: "fadeIn 0.5s ease-in-out",
                 openToRight: "openToRight 0.5s linear",
                 fadeOut: "fadeOut 0.5s ease-in-out",
+                "slide-from-right": "slide-from-right 0.5s ease-in-out",
+                "slide-from-top": "slide-from-top 0.5s ease-in-out",
             },
             keyframes: {
                 fadeIn: {
@@ -100,6 +103,14 @@ export default {
                 fadeOut: {
                     "0%": { opacity: "1", transform: "translateY(0)" },
                     "100%": { opacity: "0", transform: "translateY(1rem)" },
+                },
+                "slide-from-right": {
+                    "0%": { right: "-50%" },
+                    "100%": { right: "0" },
+                },
+                "slide-from-top": {
+                    "0%": { top: "-50%" },
+                    "100%": { top: "0" },
                 },
             },
             backgroundImage: {
