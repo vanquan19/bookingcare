@@ -1,7 +1,7 @@
 import headerLogo from "../assets/images/header_logo.png";
 import { Button, GroupButton } from "./Button";
 import { VscTriangleDown } from "react-icons/vsc";
-import { FaFacebookF, FaYoutube, FaUser } from "react-icons/fa";
+import { FaFacebookF, FaYoutube, FaUser, FaRegBell } from "react-icons/fa";
 import { AiFillInstagram } from "react-icons/ai";
 import { IoPhonePortraitOutline } from "react-icons/io5";
 import { IoIosCall } from "react-icons/io";
@@ -14,6 +14,7 @@ import { BsFileEarmarkTextFill } from "react-icons/bs";
 import { RiFileList2Line } from "react-icons/ri";
 import { CiLogout } from "react-icons/ci";
 import { logout } from "../features/authSlide";
+import socket from "../configs/socket.io";
 
 const Navbar = () => {
     //state for navbar sticky
@@ -23,7 +24,7 @@ const Navbar = () => {
     const dispath = useDispatch();
     const { navigate } = useNavigate();
     const [isShow, setIsShow] = useState(false);
-
+    const [notify, setNotify] = useState([]);
     //handle navbar sticky
     useEffect(() => {
         let lastScrollY = window.scrollY;
@@ -45,12 +46,29 @@ const Navbar = () => {
         };
     }, []);
 
+    useEffect(() => {
+        const event = `recive-notify-accept-${user.id}`;
+
+        const handleNotify = (data) => {
+            setNotify((prev) => [...prev, data]);
+        };
+
+        // Đăng ký sự kiện
+        socket.on(event, handleNotify);
+
+        return () => {
+            socket.off(event, handleNotify);
+        };
+    }, [socket, user.id]);
+
     const hanldeLogout = () => {
         dispath(logout());
         navigate("/");
     };
+    console.log(notify);
+
     return (
-        <nav className={`${scroll ? "left-0 max-h-16" : "max-h-32 "} fixed top-0 z-40  bg-white flex shadow-md transition-all`}>
+        <nav className={`${scroll ? "left-0 max-h-16" : "max-h-32 "} fixed top-0 z-40 w-full bg-white flex shadow-md transition-all`}>
             <div className="w-1/5 lg:p-0 p-4 flex">
                 <a href="/" className="h-full w-full">
                     <img className="h-full w-full object-cover" src={headerLogo} alt="Logo" />
@@ -85,12 +103,27 @@ const Navbar = () => {
                         </li>
                     </ul>
                     <GroupButton>
-                        {/* <a href="http://localhost:5173/#download-app">
-                            <Button className="gap-2 rounded-full px-6 bg-orange-100 border-orange-100 hover:bg-orange-200 hover:border-orange-200 transition-all text-white font-semibold group">
-                                <IoPhonePortraitOutline className="stroke-white" />
-                                Tải ứng dụng
-                            </Button>
-                        </a> */}
+                        <div className="flex relative group">
+                            <button className="p-2 mr-4 relative">
+                                <FaRegBell size={20} className="text-primary" />
+                                {notify.length > 0 && (
+                                    <span className="absolute top-0 -right-1 bg-red-300 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-semibold">{notify.length}</span>
+                                )}
+                            </button>
+                            <div className="p-4 right-0 absolute top-full bg-white shadow-md rounded-lg z-40 group-hover:flex group-hover:flex-col gap-2 items-center hidden animate-fadeIn min-w-64">
+                                {notify.length > 0 ? (
+                                    notify.map((item, index) => (
+                                        <div key={index} className="flex min-w-96  pb-2 border-b border-gray-400">
+                                            <h3 className="font-medium w-full line-clamp-2">
+                                                {item.senderName} <span className="lowercase font-normal">thông báo {item.message}</span>
+                                            </h3>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="flex text-gray-500 font-medium text-md justify-center h-full w-full min-h-32 items-center">Không có thông báo mới</div>
+                                )}
+                            </div>
+                        </div>
                         {!username ? (
                             <Link to="/login">
                                 <Button className="gap-2 rounded-full px-6 border-primary text-primary font-semibold hover:bg-gradient-to-r hover:from-primary-2 hover:to-primary hover:text-white transition-all group">
@@ -117,7 +150,7 @@ const Navbar = () => {
                                     <ul className="mt-2">
                                         <li>
                                             <Link
-                                                to="/profile"
+                                                to="/lich-su-kham-benh?key=recoreds"
                                                 className="py-2 px-4 hover:bg-gray-200 transition-all text-base font-medium rounded-lg flex items-center gap-2 group hover:text-primary">
                                                 <BsFileEarmarkTextFill className="group-hover:animate-bounce group-hover:fill-primary  transition-all" />
                                                 Hồ sơ bệnh nhân
@@ -125,7 +158,7 @@ const Navbar = () => {
                                         </li>
                                         <li>
                                             <Link
-                                                to="/booking"
+                                                to="/lich-su-kham-benh?key=bills"
                                                 className="py-2 px-4 hover:bg-gray-200 transition-all text-base font-medium rounded-lg flex items-center gap-2 group hover:text-primary">
                                                 <RiFileList2Line className="group-hover:animate-bounce group-hover:fill-primary  transition-all" />
                                                 Phiếu khám bệnh
@@ -145,7 +178,7 @@ const Navbar = () => {
                         )}
                     </GroupButton>
                 </div>
-                <div className="2lg:flex hidden gap-8 h-full w-full border-solid border-t border-gray-300 px-4 nav_sticky">
+                <div className="2lg:flex hidden gap-8 h-full w-full border-solid border-t border-gray-300 px-4 nav_sticky justify-center">
                     <div className="my-auto">
                         <div className="flex items-center gap-2">
                             <IoIosCall className="fill-red-200" size={30} />
@@ -155,7 +188,7 @@ const Navbar = () => {
                             </div>
                         </div>
                     </div>
-                    <ul className="flex  h-full w-full px-4 font-xl font-semibold">
+                    <ul className="flex  h-full w-fit px-4 font-xl font-semibold">
                         <li>
                             <div className="px-4 relative flex items-center gap-1 border-b-2 border-transparent hover:border-primary hover:border-b-2 border-solid h-full hover:text-primary transition-all group">
                                 <Link to="/co-so-y-te">Cơ sở y tế</Link>
@@ -185,7 +218,7 @@ const Navbar = () => {
                                 </List>
                             </div>
                         </li>
-                        <li>
+                        {/* <li>
                             <div className="relative px-4 flex items-center gap-1 border-b-2 border-transparent hover:border-primary hover:border-b-2 border-solid h-full hover:text-primary transition-all group">
                                 <Link to="#">Dịch vụ khám bệnh</Link>
                                 <VscTriangleDown className="group-hover:fill-primary transition-all" />
@@ -207,22 +240,22 @@ const Navbar = () => {
                                     </Link>
                                     <Link to="/dich-vu-y-te/y-te-tai-nha">
                                         <Item>Đặt lịch khám tại nhà</Item>
-                                    </Link>
+                                    </Link> 
                                     <Link to="/dich-vu-y-te/thanh-toan-vien-phi">
                                         <Item>Thanh toán viện phí</Item>
                                     </Link>
                                 </List>
                             </div>
-                        </li>
-                        <li>
+                        </li> */}
+                        {/* <li>
                             <div className="px-4 flex items-center border-b-2 border-transparent hover:border-primary hover:border-b-2 border-solid h-full hover:text-primary transition-all">
                                 <Link to="/kham-suc-khoe-doanh-nghiep">Khám sức khỏe doanh nghiệp</Link>
                             </div>
-                        </li>
+                        </li> */}
                         <li>
                             <div className="relative px-4 flex items-center gap-1 border-b-2 border-transparent hover:border-primary hover:border-b-2 border-solid h-full hover:text-primary transition-all group">
-                                <Link t="/tin-tuc">Tin tức</Link>
-                                <VscTriangleDown className="group-hover:fill-primary transition-all" />
+                                <Link to="/tin-tuc/tin-dich-vu">Tin tức</Link>
+                                {/* <VscTriangleDown className="group-hover:fill-primary transition-all" />
                                 <List className="hidden group-hover:block before:content-[''] before:absolute before:h-2 before:w-full before:-top-2 before:left-0 animate-fadeIn">
                                     <Item>
                                         <Link to="/tin-tuc/tin-dich-vu">Tin dịch vụ</Link>
@@ -233,33 +266,35 @@ const Navbar = () => {
                                     <Item>
                                         <Link to="/tin-tuc/y-hoc-thuong-thuc">Y học thường thức</Link>
                                     </Item>
+                                </List> */}
+                            </div>
+                        </li>
+                        <li>
+                            <div className="relative px-4 flex items-center gap-1 border-b-2 border-transparent hover:border-primary hover:border-b-2 border-solid h-full hover:text-primary transition-all group">
+                                <Link to="/huong-dan/dat-lich-kham">Hướng dẫn</Link>
+                                <VscTriangleDown className="group-hover:fill-primary transition-all" />
+                                <List className="hidden group-hover:block before:content-[''] before:absolute before:h-2 before:w-full before:-top-2 before:left-0 animate-fadeIn">
+                                    <Link to="/huong-dan/dat-lich-kham">
+                                        <Item>Đặt lịch khám</Item>
+                                    </Link>
+                                    <Link to="/huong-dan/hoi-dap">
+                                        <Item>Câu hỏi thường gặp</Item>
+                                    </Link>
                                 </List>
                             </div>
                         </li>
                         <li>
                             <div className="relative px-4 flex items-center gap-1 border-b-2 border-transparent hover:border-primary hover:border-b-2 border-solid h-full hover:text-primary transition-all group">
-                                <Link to="/huong-dan">Hướng dẫn</Link>
-                                <VscTriangleDown className="group-hover:fill-primary transition-all" />
+                                <Link to="/lien-he-hop-tac">Liên hệ hợp tác</Link>
+                                {/* <VscTriangleDown className="group-hover:fill-primary transition-all" />
                                 <List className="hidden group-hover:block before:content-[''] before:absolute before:h-2 before:w-full before:-top-2 before:left-0 animate-fadeIn">
-                                    <Item>Cài đặt ứng dụng</Item>
-                                    <Item>Đặt lịch khám</Item>
-                                    <Item>Tư vấn khám qua video</Item>
-                                    <Item>Quy trình hoàn phí</Item>
-                                    <Item>Câu hỏi thường găp</Item>
-                                    <Item>Quy trình đi khám</Item>
-                                </List>
-                            </div>
-                        </li>
-                        <li>
-                            <div className="relative px-4 flex items-center gap-1 border-b-2 border-transparent hover:border-primary hover:border-b-2 border-solid h-full hover:text-primary transition-all group">
-                                <Link to="/contact">Liên hệ hợp tác</Link>
-                                <VscTriangleDown className="group-hover:fill-primary transition-all" />
-                                <List className="hidden group-hover:block before:content-[''] before:absolute before:h-2 before:w-full before:-top-2 before:left-0 animate-fadeIn">
-                                    <Item>Tham gia Booking</Item>
-                                    <Item>Quảng cáo</Item>
-                                    <Item>Tuyển dụng</Item>
-                                    <Item>Về Booking</Item>
-                                </List>
+                                    <Link to="/lien-he-hop-tac">
+                                        <Item>Tham gia Booking</Item>
+                                    </Link>
+                                    <Link to="/gioi-thieu">
+                                        <Item>Về Booking</Item>
+                                    </Link>
+                                </List> */}
                             </div>
                         </li>
                     </ul>

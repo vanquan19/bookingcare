@@ -9,10 +9,10 @@ import { logout } from "../features/authSlide";
 import logo from "../assets/images/header_logo.png";
 
 const initialNavigation = [
-    { name: "Phân tích", href: "/admin", current: true },
+    // { name: "Phân tích", href: "/admin", current: true },
     { name: "Quản lý phòng khám", href: "/admin/clinic-management", current: false },
-    { name: "Quản lý tin tức", href: "/admin/news-management", current: false },
-    { name: "Tin nhắn", href: "/admin/chat", current: false },
+    { name: "Liên hệ hợp tác", href: "/admin/contract", current: false },
+    { name: "Hướng dẫn & Hỏi đáp", href: "/admin/instruction", current: false },
 ];
 
 function classNames(...classes) {

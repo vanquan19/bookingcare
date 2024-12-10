@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button, GroupButton } from "./Button";
 import { LuCalendarHeart, LuMapPin } from "react-icons/lu";
 import { Star } from "./Star";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { CiClock2 } from "react-icons/ci";
 import { getData, setData } from "../utils/fetchData";
 import { CLIENTLIMIT } from "../configs/constance";
@@ -296,7 +296,6 @@ export const MedicalFacility = () => {
 export const MedicalBookingForm = (props) => {
     const clinicId = new URLSearchParams(window.location.search).get("id");
     const [specialty, setSpecialty] = useState([]);
-    const [doctor, setDoctor] = useState([]);
     const [packageMedical, setPackageMedical] = useState([]);
     const [clinicName, setClinicName] = useState("");
     useEffect(() => {
@@ -304,20 +303,17 @@ export const MedicalBookingForm = (props) => {
         const getSpecialty = async () => {
             //call Api to get specialty
             const response = await getData(`/clinic/specialty/read-public?clinicId=${clinicId}`);
-            //call Api to get doctor
-            const responseDoctor = await getData(`/doctor/read-public?clinicId=${clinicId}`);
             //call Api to get packageMedical
             const responsePackageMedical = await getData(`/clinic/medical-package/read-public?clinicId=${clinicId}`);
             //get clinic
             const responseClinic = await getData(`/clinic/read?id=${clinicId}`);
-            if (!response.isSuccess || !responsePackageMedical.isSuccess || !responseClinic.isSuccess || !responseDoctor.isSuccess) {
+            if (!response.isSuccess || !responsePackageMedical.isSuccess || !responseClinic.isSuccess) {
                 toast.error(response.message);
                 return;
             }
             console.log(response, responsePackageMedical, responseClinic);
 
             setSpecialty(response.data);
-            setDoctor(responseDoctor.data);
             setPackageMedical(responsePackageMedical.data);
             setClinicName(responseClinic.data.name);
         };
@@ -333,7 +329,7 @@ export const MedicalBookingForm = (props) => {
                 <h1 className="text-4xl text-primary font-bold mb-0">Hình thức đặt khám</h1>
                 <span className="font-thin text-base">Đặt khám nhanh chóng, không phải chờ đợi với nhiều cơ sở y tế trên khắp các tỉnh thành</span>
                 <div className="mt-8 flex gap-8">
-                    {specialty.length > 0 && (
+                    {specialty?.length > 0 && (
                         <Link to={`/dat-kham-theo-chuyen-khoa?id=${clinicId}`}>
                             <div className="bg-white p-4 rounded-md text-base font-semibold text-gray-700 flex items-center gap-4">
                                 <img src={imgSpecialty} alt="logo chuyen khoa" className="h-10 w-10" />
@@ -341,7 +337,7 @@ export const MedicalBookingForm = (props) => {
                             </div>
                         </Link>
                     )}
-                    {packageMedical.length > 0 && (
+                    {packageMedical?.length > 0 && (
                         <Link to={`/dat-kham-theo-goi-kham?id=${clinicId}`}>
                             <div className="bg-white p-4 rounded-md text-base font-semibold text-gray-700 flex items-center gap-4">
                                 <img src={imgMedicalPackage} alt="logo goi kham" className="h-10 w-10" />
@@ -349,16 +345,8 @@ export const MedicalBookingForm = (props) => {
                             </div>
                         </Link>
                     )}
-                    {doctor.length > 0 && (
-                        <Link to={`/dat-kham-theo-bac-si?id=${clinicId}`}>
-                            <div className="bg-white p-4 rounded-md text-base font-semibold text-gray-700 flex items-center gap-4">
-                                <img src={imgDoctor} alt="logo bac si" className="h-10 w-10" />
-                                Đặt khám theo bác sĩ
-                            </div>
-                        </Link>
-                    )}
 
-                    {doctor.length === 0 && specialty.length === 0 && packageMedical.length === 0 && (
+                    {specialty?.length === 0 && packageMedical?.length === 0 && (
                         <div className="bg-white p-4 rounded-md text-base font-semibold text-gray-700 flex items-center gap-4">Không có hình thức đặt khám</div>
                     )}
                 </div>
@@ -367,15 +355,66 @@ export const MedicalBookingForm = (props) => {
     );
 };
 
+//booking component for booking care
+
+export const BookingContainer = () => {
+    const clinicId = new URLSearchParams(window.location.search).get("id");
+    const [clinic, setClinic] = useState({});
+    const [data, setData] = useState({});
+
+    const handleUpdateData = (data) => {
+        setData((prev) => ({ ...prev, ...data }));
+    };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await getData(`/clinic/read?id=${clinicId}`);
+            if (!response.isSuccess) {
+                toast.error(response.message);
+                return;
+            }
+            setClinic(response.data);
+            handleUpdateData({ clinicId: clinicId });
+        };
+        fetchData();
+    }, [clinicId]);
+
+    return (
+        <div className={`pt-32 mb-8 flex flex-col px-8 lg:px-16`}>
+            <div className="font-semibold text-primary text-xl my-4">
+                <Link to={`/chi-tiet-phong-kham?id=${clinic.id}`}>{clinic.name}</Link> {" > "}
+                <Link to={`/hinh-thuc-dat-kham?id=${clinic.id}`} className="font-medium text-lg text-gray-700">
+                    Các hình thức đặt khám
+                </Link>
+                {" > "}
+                <span className="font-medium text-lg text-gray-700">Đặt lịch khám</span>
+            </div>
+            <div className="grid grid-cols-7 px-16 lg:px-32 gap-8">
+                <div className="col-span-2">
+                    <div className="bg-white shadow rounded-lg overflow-hidden">
+                        <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Thông tin cơ sở y tế</h2>
+                        <div className="p-4 flex gap-2">
+                            <FaHospitalAlt size={35} />
+                            <div>
+                                <h3 className="font-medium text-gray-800">{clinic.name}</h3>
+                                <span className="font-medium text-gray-500 text-sm">{clinic.address}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <Outlet context={{ data, handleUpdateData }} />
+            </div>
+        </div>
+    );
+};
+
 export const ListSpecialty = () => {
     const clinicId = new URLSearchParams(window.location.search).get("id");
     const [specialty, setSpecialty] = useState([]);
-    const [clinic, setClinic] = useState({});
     const [search, setSearch] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState(search);
     //data for booking care
-    const [isOpenPickerDate, setIsOpenPickerDate] = useState(false);
-    const [data, setData] = useState({});
+    const { handleUpdateData, data } = useOutletContext();
     const navigate = useNavigate();
     const auth = useSelector((state) => state.auth);
 
@@ -400,93 +439,37 @@ export const ListSpecialty = () => {
         fetchData();
     }, [clinicId, debouncedQuery]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const response = await getData(`/clinic/read?id=${clinicId}`);
-            if (!response.isSuccess) {
-                toast.error(response.message);
-                return;
-            }
-            setClinic(response.data);
-        };
-        fetchData();
-    }, [clinicId]);
-
-    const handlePickDate = (specialtyId) => {
-        setData({ specialtyId: specialtyId });
-        setIsOpenPickerDate(true);
+    const handleChooseSpecialty = (specialtyId) => {
+        handleUpdateData({ specialtyId: specialtyId });
+        navigate(`/dat-kham-theo-chuyen-khoa/chon-bac-si?id=${data.clinicId}`);
     };
-    useEffect(() => {
-        if (data.specialtyId && data.date && data.time && data.month && data.year) {
-            if (!auth.isAuthenticated) {
-                toast.warn("Vui lòng đăng nhập để đặt lịch khám");
-                navigate("/login");
-                return;
-            }
-            navigate(`/chon-ho-so?id=${clinicId}&specialtyId=${data.specialtyId}&date=${data.date}&time=${data.time}&month=${data.month}&year=${data.year}`);
-        }
-    }, [data]);
 
     return (
-        <div className={`pt-32 ${isOpenPickerDate ? "mb-8" : "h-screen "} flex flex-col px-8 lg:px-16`}>
-            <div className="font-semibold text-primary text-xl my-4">
-                <Link to={`/chi-tiet-phong-kham?id=${clinic.id}`}>{clinic.name}</Link> {" > "}
-                <Link to={`/hinh-thuc-dat-kham?id=${clinic.id}`} className="font-medium text-lg text-gray-700">
-                    Các hình thức đặt khám
-                </Link>
-                {" > "}
-                <span className="font-medium text-lg text-gray-700">Chọn chuyên khoa</span>
+        <div className="col-span-5 bg-white shadow rounded-lg overflow-hidden">
+            <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Vui lòng chọn chuyên khoa</h2>
+            <div className=" m-4 relative">
+                <input placeholder="Tìm kiếm nhanh chuyên khoa" className="border outline-none border-gray-400 rounded p-3 w-full" type="search" onChange={(e) => setSearch(e.target.value)} />
+                <FaSearch className="absolute top-1/2 right-4 transform -translate-y-1/2 " />
             </div>
-            <div className="grid grid-cols-7 px-16 lg:px-32 gap-8">
-                <div className="col-span-2">
-                    <div className="bg-white shadow rounded-lg overflow-hidden">
-                        <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Thông tin cơ sở y tế</h2>
-                        <div className="p-4 flex gap-2">
-                            <FaHospitalAlt size={35} />
-                            <div>
-                                <h3 className="font-medium text-gray-800">{clinic.name}</h3>
-                                <span className="font-medium text-gray-500 text-sm">{clinic.address}</span>
+            <hr className="mx-4 my-2 bg-gray-300 h-[2px]" />
+            <div className="p-4 pt-0 flex flex-col max-h-80 overflow-scroll no-scrollbar">
+                {specialty.length > 0 ? (
+                    specialty.map((item, index) => (
+                        <div key={index} className="text-gray-800 p-2  border-b border-gray-400 hover:text-primary transition-all duration-300 group">
+                            <div className="flex justify-between items-center">
+                                <h3 className="font-medium group-hover:text-primary transition-all duration-300">{item.name}</h3>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => handleChooseSpecialty(item.id)}
+                                        className="p-2 text-white bg-primary font-medium text-base rounded-lg hover:bg-primary-2 transition-all duration-300">
+                                        Đặt khám ngay
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                {!isOpenPickerDate ? (
-                    <div className="col-span-5 bg-white shadow rounded-lg overflow-hidden">
-                        <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Vui lòng chọn chuyên khoa</h2>
-                        <div className=" m-4 relative">
-                            <input
-                                placeholder="Tìm kiếm nhanh chuyên khoa"
-                                className="border outline-none border-gray-400 rounded p-3 w-full"
-                                type="search"
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                            <FaSearch className="absolute top-1/2 right-4 transform -translate-y-1/2 " />
-                        </div>
-                        <hr className="mx-4 my-2 bg-gray-300 h-[2px]" />
-                        <div className="p-4 pt-0 flex flex-col max-h-80 overflow-scroll no-scrollbar">
-                            {specialty.length > 0 ? (
-                                specialty.map((item, index) => (
-                                    <div key={index} className="text-gray-800 p-2  border-b border-gray-400 hover:text-primary transition-all duration-300 group">
-                                        <div className="flex justify-between items-center">
-                                            <h3 className="font-medium group-hover:text-primary transition-all duration-300">{item.name}</h3>
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-medium text-gray-600 text-base">{item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VNĐ</span>
-                                                <button
-                                                    className="p-2 text-white bg-primary font-medium text-base rounded-lg hover:bg-primary-2 transition-all duration-300"
-                                                    onClick={() => handlePickDate(item.id)}>
-                                                    Đặt khám ngay
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="text-center font-medium text-gray-500">Không có gói khám nào</div>
-                            )}
-                        </div>
-                    </div>
+                    ))
                 ) : (
-                    <PickerDate data={data} setData={setData} />
+                    <div className="text-center font-medium text-gray-500">Không có gói khám nào</div>
                 )}
             </div>
         </div>
@@ -494,11 +477,13 @@ export const ListSpecialty = () => {
 };
 
 export const ListDoctor = () => {
-    const clinicId = new URLSearchParams(window.location.search).get("id");
     const [doctors, setDoctors] = useState([]);
-    const [clinic, setClinic] = useState({});
     const [search, setSearch] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState(search);
+    const { handleUpdateData, data } = useOutletContext();
+    //data for booking care
+    const navigate = useNavigate();
+    const auth = useSelector((state) => state.auth);
 
     useEffect(() => {
         const timmer = setTimeout(() => {
@@ -509,9 +494,10 @@ export const ListDoctor = () => {
         };
     }, [search]);
 
+    //get data from API follow specialtyId
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getData(`/doctor/read-public?clinicId=${clinicId}&search=${debouncedQuery}`);
+            const response = await getData(`/doctor/read-public?clinicId=${data.clinicId}&search=${debouncedQuery}&specialtyId=${data.specialtyId}`);
             if (!response.isSuccess) {
                 toast.error(response.message);
                 return;
@@ -519,7 +505,54 @@ export const ListDoctor = () => {
             setDoctors(response.data);
         };
         fetchData();
-    }, [clinicId, debouncedQuery]);
+    }, [data.clinicId, debouncedQuery]);
+
+    const handleChoseDoctor = (doctorId) => {
+        handleUpdateData({ doctorId: doctorId });
+        navigate(`/dat-kham-theo-chuyen-khoa/chon-ngay?id=${data.clinicId}`);
+    };
+
+    return (
+        <div className="col-span-5 bg-white shadow rounded-lg overflow-hidden">
+            <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Vui lòng chọn bác sĩ</h2>
+            <div className=" m-4 relative">
+                <input placeholder="Tìm kiếm bác sĩ" className="border outline-none border-gray-400 rounded p-3 w-full" type="search" onChange={(e) => setSearch(e.target.value)} />
+                <FaSearch className="absolute top-1/2 right-4 transform -translate-y-1/2 " />
+            </div>
+            <hr className="mx-4 my-2 bg-gray-300 h-[2px]" />
+            <div className="p-4 pt-0 flex flex-col max-h-80 overflow-scroll no-scrollbar">
+                {doctors?.length > 0 ? (
+                    doctors.map((item, index) => (
+                        <div key={index} className="text-gray-800 p-2  border-b border-gray-400 hover:text-primary transition-all duration-300 group">
+                            <div className="flex justify-between items-center">
+                                <h3 className="font-medium group-hover:text-primary transition-all duration-300">{item.firstname + " " + item.lastname}</h3>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-gray-600 text-base">{item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VNĐ</span>
+                                    <button
+                                        onClick={() => handleChoseDoctor(item.id)}
+                                        className="p-2 text-white bg-primary font-medium text-base rounded-lg hover:bg-primary-2 transition-all duration-300">
+                                        Đặt khám ngay
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="text-center font-medium text-gray-500">Không có gói khám nào</div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export const BookingPackage = () => {
+    const clinicId = new URLSearchParams(window.location.search).get("id");
+    const [clinic, setClinic] = useState({});
+    const [data, setData] = useState({});
+
+    const handleUpdateData = (data) => {
+        setData((prev) => ({ ...prev, ...data }));
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -529,19 +562,20 @@ export const ListDoctor = () => {
                 return;
             }
             setClinic(response.data);
+            handleUpdateData({ clinicId: clinicId });
         };
         fetchData();
     }, [clinicId]);
 
     return (
-        <div className="pt-32 h-screen flex flex-col px-8 lg:px-16">
+        <div className={`pt-32 mb-8 flex flex-col px-8 lg:px-16`}>
             <div className="font-semibold text-primary text-xl my-4">
                 <Link to={`/chi-tiet-phong-kham?id=${clinic.id}`}>{clinic.name}</Link> {" > "}
                 <Link to={`/hinh-thuc-dat-kham?id=${clinic.id}`} className="font-medium text-lg text-gray-700">
                     Các hình thức đặt khám
                 </Link>
                 {" > "}
-                <span className="font-medium text-lg text-gray-700">Chọn bác sĩ</span>
+                <span className="font-medium text-lg text-gray-700">Đặt lịch khám</span>
             </div>
             <div className="grid grid-cols-7 px-16 lg:px-32 gap-8">
                 <div className="col-span-2">
@@ -556,31 +590,7 @@ export const ListDoctor = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-span-5 bg-white shadow rounded-lg overflow-hidden">
-                    <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Vui lòng chọn bác sĩ</h2>
-                    <div className=" m-4 relative">
-                        <input placeholder="Tìm kiếm gói khám" className="border outline-none border-gray-400 rounded p-3 w-full" type="search" onChange={(e) => setSearch(e.target.value)} />
-                        <FaSearch className="absolute top-1/2 right-4 transform -translate-y-1/2 " />
-                    </div>
-                    <hr className="mx-4 my-2 bg-gray-300 h-[2px]" />
-                    <div className="p-4 pt-0 flex flex-col max-h-80 overflow-scroll no-scrollbar">
-                        {doctors.length > 0 ? (
-                            doctors.map((item, index) => (
-                                <Link to key={index} className="text-gray-800 p-2  border-b border-gray-400 hover:text-primary transition-all duration-300 group">
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="font-medium group-hover:text-primary transition-all duration-300">{item.firstname + " " + item.lastname}</h3>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium text-gray-600 text-base">{item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VNĐ</span>
-                                            <button className="p-2 text-white bg-primary font-medium text-base rounded-lg hover:bg-primary-2 transition-all duration-300">Đặt khám ngay</button>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))
-                        ) : (
-                            <div className="text-center font-medium text-gray-500">Không có gói khám nào</div>
-                        )}
-                    </div>
-                </div>
+                <Outlet context={{ data, handleUpdateData }} />
             </div>
         </div>
     );
@@ -592,6 +602,11 @@ export const ListMedicalPakage = () => {
     const [clinic, setClinic] = useState({});
     const [search, setSearch] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState(search);
+
+    //data for booking care
+    const { handleUpdateData, data } = useOutletContext();
+    const navigate = useNavigate();
+    const auth = useSelector((state) => state.auth);
 
     useEffect(() => {
         const timmer = setTimeout(() => {
@@ -609,6 +624,8 @@ export const ListMedicalPakage = () => {
                 toast.error(response.message);
                 return;
             }
+            console.log(response);
+
             setMedicalPackage(response.data);
         };
         fetchData();
@@ -622,66 +639,52 @@ export const ListMedicalPakage = () => {
                 return;
             }
             setClinic(response.data);
+            handleUpdateData({ clinicId: clinicId });
         };
         fetchData();
-    }, [clinicId]);
+    }, [data.clinicId]);
 
-    console.log(medicalPackage, clinic);
+    const handleChosePackage = (packageId, doctorId) => {
+        handleUpdateData({ packageId: packageId, doctorId: doctorId });
+        navigate(`/dat-kham-theo-goi-kham/chon-ngay?id=${data.clinicId}`);
+    };
 
     return (
-        <div className="pt-32 h-screen flex flex-col px-8 lg:px-16">
-            <div className="font-semibold text-primary text-xl my-4">
-                <Link to={`/chi-tiet-phong-kham?id=${clinic.id}`}>{clinic.name}</Link> {" > "}
-                <Link to={`/hinh-thuc-dat-kham?id=${clinic.id}`} className="font-medium text-lg text-gray-700">
-                    Các hình thức đặt khám
-                </Link>
-                {" > "}
-                <span className="font-medium text-lg text-gray-700">Chọn gói khám</span>
+        <div className="col-span-5 bg-white shadow rounded-lg overflow-hidden">
+            <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Vui lòng gói khám</h2>
+            <div className=" m-4 relative">
+                <input placeholder="Tìm kiếm gói khám" className="border outline-none border-gray-400 rounded p-3 w-full" type="search" onChange={(e) => setSearch(e.target.value)} />
+                <FaSearch className="absolute top-1/2 right-4 transform -translate-y-1/2 " />
             </div>
-            <div className="grid grid-cols-7 px-16 lg:px-32 gap-8">
-                <div className="col-span-2">
-                    <div className="bg-white shadow rounded-lg overflow-hidden">
-                        <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Thông tin cơ sở y tế</h2>
-                        <div className="p-4 flex gap-2">
-                            <FaHospitalAlt size={35} />
-                            <div>
-                                <h3 className="font-medium text-gray-800">{clinic.name}</h3>
-                                <span className="font-medium text-gray-500 text-sm">{clinic.address}</span>
+            <hr className="mx-4 my-2 bg-gray-300 h-[2px]" />
+            <div className="p-4 pt-0 flex flex-col max-h-80 overflow-scroll no-scrollbar">
+                {medicalPackage.length > 0 ? (
+                    medicalPackage.map((item, index) => (
+                        <div className="text-gray-800 p-2  border-b border-gray-400 hover:text-primary transition-all duration-300 group">
+                            <div className="flex justify-between items-center">
+                                <h3 className="font-medium group-hover:text-primary transition-all duration-300">{item.name}</h3>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium text-gray-600 text-base">{item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VNĐ</span>
+                                    <button
+                                        onClick={() => handleChosePackage(item.id, item.doctorId)}
+                                        className="p-2 text-white bg-primary font-medium text-base rounded-lg hover:bg-primary-2 transition-all duration-300">
+                                        Đặt khám ngay
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div className="col-span-5 bg-white shadow rounded-lg overflow-hidden">
-                    <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Vui lòng gói khám</h2>
-                    <div className=" m-4 relative">
-                        <input placeholder="Tìm kiếm gói khám" className="border outline-none border-gray-400 rounded p-3 w-full" type="search" onChange={(e) => setSearch(e.target.value)} />
-                        <FaSearch className="absolute top-1/2 right-4 transform -translate-y-1/2 " />
-                    </div>
-                    <hr className="mx-4 my-2 bg-gray-300 h-[2px]" />
-                    <div className="p-4 pt-0 flex flex-col max-h-80 overflow-scroll no-scrollbar">
-                        {medicalPackage.length > 0 ? (
-                            medicalPackage.map((item, index) => (
-                                <Link to key={index} className="text-gray-800 p-2  border-b border-gray-400 hover:text-primary transition-all duration-300 group">
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="font-medium group-hover:text-primary transition-all duration-300">{item.name}</h3>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium text-gray-600 text-base">{item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VNĐ</span>
-                                            <button className="p-2 text-white bg-primary font-medium text-base rounded-lg hover:bg-primary-2 transition-all duration-300">Đặt khám ngay</button>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))
-                        ) : (
-                            <div className="text-center font-medium text-gray-500">Không có gói khám nào</div>
-                        )}
-                    </div>
-                </div>
+                    ))
+                ) : (
+                    <div className="text-center font-medium text-gray-500">Không có gói khám nào</div>
+                )}
             </div>
         </div>
     );
 };
 
-const PickerDate = ({ data, setData }) => {
+export const PickerDate = () => {
+    const { handleUpdateData, data } = useOutletContext();
+    const navigate = useNavigate();
     const [isOpenPickerTime, setIsOpenPickerTime] = useState(false);
 
     useEffect(() => {
@@ -689,14 +692,19 @@ const PickerDate = ({ data, setData }) => {
             setIsOpenPickerTime(true);
         }
     }, [data.date, data.month, data.year]);
+
+    const handleChoseTime = (time) => {
+        handleUpdateData({ time: time });
+        navigate(`/${data.specialtyId ? "dat-kham-theo-chuyen-khoa" : "dat-kham-theo-goi-kham"}/chon-ho-so?id=${data.clinicId}`);
+    };
+
     return (
         <div className="col-span-5 bg-white shadow rounded-lg overflow-hidden ">
             <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Vui lòng chọn lịch khám</h2>
             <div className="p-4 pt-0 flex flex-col ">
                 <DatePicker
                     onPicker={(datePicker) =>
-                        setData({
-                            ...data,
+                        handleUpdateData({
                             date: datePicker.date(),
                             month: datePicker.month(),
                             year: datePicker.year(),
@@ -717,23 +725,12 @@ const PickerDate = ({ data, setData }) => {
                             <h2 className="text-lg font-medium text-gray-700 my-2">Sáng</h2>
                             <div className="flex gap-2">
                                 <button
-                                    onClick={(e) =>
-                                        setData({
-                                            ...data,
-
-                                            time: e.target.innerText,
-                                        })
-                                    }
+                                    onClick={(e) => handleChoseTime(e.target.innerText)}
                                     className="px-3 py-2 border border-orange-200 rounded hover:bg-orange-100 hover:text-white transition-all duration-200 font-medium">
                                     8:00 - 9:30
                                 </button>
                                 <button
-                                    onClick={(e) =>
-                                        setData({
-                                            ...data,
-                                            time: e.target.innerText,
-                                        })
-                                    }
+                                    onClick={(e) => handleChoseTime(e.target.innerText)}
                                     className="px-3 py-2 border border-orange-200 rounded hover:bg-orange-100 hover:text-white transition-all duration-200 font-medium">
                                     10:00 - 11:30
                                 </button>
@@ -741,22 +738,12 @@ const PickerDate = ({ data, setData }) => {
                             <h2 className="text-lg font-medium text-gray-700 my-2">Chiều</h2>
                             <div className="flex gap-2">
                                 <button
-                                    onClick={(e) =>
-                                        setData({
-                                            ...data,
-                                            time: e.target.innerText,
-                                        })
-                                    }
+                                    onClick={(e) => handleChoseTime(e.target.innerText)}
                                     className="px-3 py-2 border border-orange-200 rounded hover:bg-orange-100 hover:text-white transition-all duration-200 font-medium">
                                     14:00 - 15:30
                                 </button>
                                 <button
-                                    onClick={(e) =>
-                                        setData({
-                                            ...data,
-                                            time: e.target.innerText,
-                                        })
-                                    }
+                                    onClick={(e) => handleChoseTime(e.target.innerText)}
                                     className="px-3 py-2 border border-orange-200 rounded hover:bg-orange-100 hover:text-white transition-all duration-200 font-medium">
                                     16:00 - 17:30
                                 </button>
@@ -770,15 +757,9 @@ const PickerDate = ({ data, setData }) => {
 };
 
 export const SelectPatientProfile = () => {
-    const clinicId = new URLSearchParams(window.location.search).get("id");
-    const specialtyId = new URLSearchParams(window.location.search).get("specialtyId");
-    const date = new URLSearchParams(window.location.search).get("date");
-    const time = new URLSearchParams(window.location.search).get("time");
-    const month = new URLSearchParams(window.location.search).get("month");
-    const year = new URLSearchParams(window.location.search).get("year");
     const [profiles, setProfiles] = useState([]);
-    const [profileId, setProfileID] = useState("");
-
+    const { handleUpdateData, data } = useOutletContext();
+    const navigate = useNavigate();
     //get token from redux
     const token = useSelector((state) => state.auth.accessToken);
     useEffect(() => {
@@ -796,18 +777,15 @@ export const SelectPatientProfile = () => {
     const sentNotification = () => {
         socket.emit("create-booking", {
             message: "Bạn có lịch khám mới",
-            clinicId: clinicId,
+            clinicId: data.clinicId,
         });
     };
 
     const handleSubmit = async () => {
-        if (!profileId) {
+        if (!data.profileId) {
             toast.error("Vui lòng chọn hồ sơ bệnh nhân");
             return;
         }
-        const data = { clinicId, specialtyId, date, time, month, year, profileId };
-        console.log(data);
-
         const response = await setData(`/create-history-booking`, "POST", data, "application/json", token);
         if (!response.isSuccess) {
             toast.error(response.message);
@@ -815,64 +793,55 @@ export const SelectPatientProfile = () => {
         }
         sentNotification();
         toast.success(response.message);
-        window.location.href = "/lich-su-dat-kham";
+        navigate("/lich-su-kham-benh?key=bills");
     };
 
     return (
-        <div className="pt-44 pb-12 h-screen flex flex-col gap-2 relative items-center">
-            <h1 className="text-4xl text-center font-bold text-primary z-30 mb-4">Chọn hồ sơ bệnh nhân</h1>
+        <div className="col-span-5 bg-white shadow rounded-lg overflow-hidden">
+            <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Chọn hồ sơ bệnh nhân</h2>
             {profiles.length > 0 ? (
-                <ul className="lg:w-1/2 md:w-2/3 w-full flex flex-col gap-4">
+                <ul className="flex flex-col max-h-80 overflow-scroll no-scrollbar border-b bg-gray-200">
                     {profiles?.map((profile, index) => (
-                        <li key={index} className="flex gap-4 bg-white rounded-lg w-full justify-between items-center">
+                        <li key={index} className="flex gap-4 border-b md:cursor-pointer w-full justify-between items-center hover:bg-white transition-all">
                             <label htmlFor={profile.id} className="w-full  px-4  py-2">
                                 <div className="flex gap-1 flex-col">
                                     <div>
                                         <span className="text-gray-800 font-medium ">Họ và tên: </span>
-                                        <span className="text-gray-900">{profile.fullname}</span>
+                                        <span className=" uppercase font-medium text-primary">{profile.fullname}</span>
                                     </div>
-                                    <div className="grid grid-cols-2">
+                                    <div>
                                         <div>
                                             <span className="text-gray-800 font-medium ">Ngày sinh: </span>
                                             <span className="text-gray-900">{profile.birthday}</span>
                                         </div>
-                                        <div>
-                                            <span className="text-gray-800 font-medium ">Giới tính: </span>
-                                            <span className="text-gray-900">{profile.sex ? "Nam" : "Nữ"}</span>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2">
-                                        <div>
-                                            <span className="text-gray-800 font-medium ">Email: </span>
-                                            <span className="text-gray-900">{profile.email}</span>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-800 font-medium ">Số điện thoại: </span>
-                                            <span className="text-gray-900">{profile.phone}</span>
-                                        </div>
                                     </div>
 
                                     <div>
-                                        <span className="text-gray-800 font-medium ">Địa chỉ: </span>
-                                        <span className="text-gray-900">{profile.curentAddress + ", " + profile.commune + ", " + profile.district + ", " + profile.province}</span>
+                                        <span className="text-gray-800 font-medium ">SĐT: </span>
+                                        <span className="text-gray-900">{profile.phone}</span>
                                     </div>
                                 </div>
                             </label>
-                            <input id={profile.id} type="radio" className="mr-4 size-5" onChange={() => setProfileID(profile.id)} />
+                            <input id={profile.id} type="radio" className="mr-4 size-5" onChange={() => handleUpdateData({ profileId: profile.id })} />
                         </li>
                     ))}
                 </ul>
             ) : (
                 <>
                     <h3 className="text-center font-medium text-gray-600 z-30">Bạn chưa có hồ sơ bệnh nhân, vui lòng thêm hồ sơ để được đặt khám.</h3>
-                    <img className="size-64 " src="https://medpro.vn/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FEmptyList.a1f0b7f8.png&w=640&q=75" alt="" />
                 </>
             )}
-            <div className="justify-between w-1/2 flex mt-6">
+            <div className="flex gap-2 my-2 mx-4 justify-end">
                 <button onClick={() => window.history.back()} className="flex items-center font-medium gap-2 py-2 px-4 text rounded-md hover:bg-gray-400  transition-all duration-150">
                     Quay lại
                     <AiOutlineRollback className="size-5" />
                 </button>
+                <Link
+                    to="/them-ho-so-benh-nhan"
+                    className="flex items-center gap-2 bg-gradient-to-r from-primary-3 to-primary-2 hover:from-primary-2 hover:to-primary transition-all duration-150 py-2 px-4 rounded-md text-white font-medium text-base">
+                    <FaUserPlus className="fill-white" />
+                    Thêm hồ sơ
+                </Link>
                 {profiles.length > 0 && (
                     <button
                         onClick={handleSubmit}
@@ -880,12 +849,6 @@ export const SelectPatientProfile = () => {
                         Xác nhận đặt khám
                     </button>
                 )}
-                <Link
-                    to="/them-ho-so-benh-nhan"
-                    className="flex items-center gap-2 bg-gradient-to-r from-primary-3 to-primary-2 hover:from-primary-2 hover:to-primary transition-all duration-150 py-2 px-4 rounded-md text-white font-medium text-base">
-                    <FaUserPlus className="fill-white" />
-                    Thêm hồ sơ
-                </Link>
             </div>
         </div>
     );

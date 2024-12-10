@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { IoMdMore } from "react-icons/io";
+import { CiViewBoard, CiCircleCheck, CiTrash } from "react-icons/ci";
 import { getData, setData } from "../utils/fetchData";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { IoMdClose, IoMdMore } from "react-icons/io";
-import { CiViewBoard } from "react-icons/ci";
 import socket from "../configs/socket.io";
+import { ModalViewPatient } from "./DoctorManagePatient";
 
-const DoctorManagePatient = () => {
+const RoleDoctorManagePatient = () => {
     const [showModalView, setShowModalView] = useState(false);
+    const [showModalRefuse, setShowModalRefuse] = useState(false);
     const [load, setLoad] = useState(false);
     const [patientsSearch, setPatientsSearch] = useState([]);
     const [status, setStatus] = useState(1);
@@ -20,7 +22,7 @@ const DoctorManagePatient = () => {
     useEffect(() => {
         const fetchPatients = async () => {
             try {
-                const response = await getData(`/get-amount-booking-by-status?clinicId=${user.data.clinicId}`, user.accessToken);
+                const response = await getData(`/get-amount-booking-by-status?clinicId=${user.data.clinicId}&doctorId=${user.data.doctorId}`, user.accessToken);
                 if (!response.isSuccess) {
                     toast.error(response.message);
                     return;
@@ -36,7 +38,7 @@ const DoctorManagePatient = () => {
     useEffect(() => {
         const fetchPatients = async () => {
             try {
-                const response = await getData(`/get-history-booking-by-status?status=${status}&clinicId=${user.data.clinicId}`, user.accessToken);
+                const response = await getData(`/get-history-by-doctor?status=${status}&doctorId=${user.data.doctorId}`, user.accessToken);
                 if (!response.isSuccess) {
                     toast.error(response.message);
                     return;
@@ -48,6 +50,38 @@ const DoctorManagePatient = () => {
         };
         fetchPatients();
     }, [status, load]);
+
+    //handle accept patient
+    const handleAcceptPatient = async (patient) => {
+        const result = window.confirm("Bạn có chắc chắn muốn xác nhận bệnh nhân này?");
+        if (result) {
+            //handle accept patient
+            const response = await setData(
+                `/update-status-history-booking`,
+                "POST",
+                {
+                    id: patient.id,
+                    status: status + 1,
+                },
+                null,
+                user.accessToken
+            );
+            if (!response.isSuccess) {
+                toast.error(response.message);
+                return;
+            }
+            setStatus(status + 1);
+            toast.success(response.message);
+            socket.emit("accept-booking", { senderId: user.data.clinicId, reciverId: patient.patientId, senderName: user.data.clinicName });
+        }
+    };
+
+    //handle delete patient
+
+    const handleRefusepatient = async (patient) => {
+        setShowModalRefuse(true);
+        setTargetPatient(patient);
+    };
 
     useEffect(() => {
         if (status === 1) {
@@ -131,6 +165,21 @@ const DoctorManagePatient = () => {
                                                     <CiViewBoard className="fill-blue-200" />
                                                     Xem chi tiết
                                                 </button>
+                                                {status <= 3 && status >= 1 && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleAcceptPatient(patient)}
+                                                            className="text-green-400 px-2 py-1 hover:bg-gray-200 outline-none rounded flex items-center gap-3 justify-start whitespace-nowrap">
+                                                            <CiCircleCheck className="fill-green-400" /> Xác nhận
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRefusepatient(patient)}
+                                                            className="text-red-300 px-2 py-1 hover:bg-gray-200 outline-none rounded flex items-center gap-3 justify-start">
+                                                            <CiTrash className="fill-red-300" />
+                                                            Từ chối
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -150,104 +199,50 @@ const DoctorManagePatient = () => {
                     </tbody>
                 </table>
             </div>
+            {showModalRefuse && <ModalRefusePatient patient={targetPatient} setStatus={setStatus} show={showModalRefuse} setShow={setShowModalRefuse} />}
             {showModalView && <ModalViewPatient patient={targetPatient} show={showModalView} setShow={setShowModalView} />}
         </div>
     );
 };
 
-export const ModalViewPatient = ({ patient, show, setShow }) => {
+const ModalRefusePatient = ({ patient, show, setShow, setStatus }) => {
+    const [message, setMessage] = useState("");
+    const user = useSelector((state) => state.auth);
+    const handleRefusePatient = async () => {
+        //handle delete patient
+        const response = await setData(
+            `/update-status-history-booking`,
+            "POST",
+            {
+                id: patient.id,
+                status: 5,
+            },
+            null,
+            user.accessToken
+        );
+        if (!response.isSuccess) {
+            toast.error(response.message);
+            return;
+        }
+        setStatus(5);
+        toast.success(response.message);
+    };
     return (
-        <div className="fixed z-30 h-screen w-screen top-0 left-0 bg-gray-500/30 transition-all duration-300">
-            <div className="p-4 fixed right-5 top-1/2 -translate-y-1/2 bg-white shadow-md rounded-lg animate-slide-from-right ">
-                <div className="flex flex-col relative">
-                    <h1 className="text-xl font-medium">Thông tin bệnh nhân</h1>
-                    <button onClick={() => setShow(false)} className="absolute top-2 right-2 text-gray-500">
-                        <IoMdClose size={20} />
+        <div className={`fixed top-0 left-0 w-full h-full bg-black/50 flex justify-center items-center z-50`}>
+            <div className="bg-white p-4 w-96 rounded-lg  animate-fadeIn transition-all">
+                <h1 className="text-xl font-medium">Lý do từ chối</h1>
+                <textarea onChange={(e) => setMessage(e.target.value)} className="w-full h-32 border border-gray-300 rounded-lg p-2 mt-2"></textarea>
+                <div className="flex gap-4 justify-end mt-4">
+                    <button onClick={() => setShow(false)} className="px-4 py-2 bg-gray-200 rounded-lg text-gray-900 font-medium">
+                        Hủy
                     </button>
-                    <div className="flex gap-4 mt-4">
-                        <ul className="min-w-64">
-                            <li className="py-2 border-b border-gray-300 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Họ và tên: </span>
-                                <span className="uppercase">{patient.fullname}</span>
-                            </li>
-                            <li className="py-2 border-b border-gray-300 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Ngày sinh: </span>
-                                <span>{new Date(patient.birthday).toLocaleDateString()}</span>
-                            </li>
-                            <li className="py-2 border-b border-gray-300 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Giới tính: </span>
-                                <span>{patient.sex === 1 ? "Nam" : "Nữ"}</span>
-                            </li>
-                            <li className="py-2 border-b border-gray-300 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Số điện thoại: </span>
-                                <span>{patient.phone}</span>
-                            </li>
-                            <li className="py-2 border-b border-gray-300 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Email: </span>
-                                <span>{patient.email}</span>
-                            </li>
-                            <li className="py-2 border-b border-gray-300 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Địa chỉ: </span>
-                                <span>{patient.commune + ", " + patient.district + ", " + patient.province}</span>
-                            </li>
-                            <li className="py-2 border-b border-gray-300 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Nghề nghiệp: </span>
-                                <span>{patient.career}</span>
-                            </li>
-                            <li className="py-2 border-b border-gray-300 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Dân tộc: </span>
-                                <span>{patient.nation}</span>
-                            </li>
-                            <li className="py-2 border-b border-gray-300 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Số CMND: </span>
-                                <span>{patient.identify}</span>
-                            </li>
-                            <li className="py-2  flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Địa chỉ hiện tại: </span>
-                                <span>{patient.address}</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <hr className="h-1 bg-gray-400" />
-                    <div className="flex flex-col relative">
-                        <h1 className="text-xl font-medium my-2">Thông tin đặt khám</h1>
-                        <ul>
-                            <li className="py-2 border-b border-gray-300 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Ngày đặt lịch: </span>
-                                <span>{patient.date + "/" + patient.month + "/" + patient.year + " - " + patient.time}</span>
-                            </li>
-                            <li className="py-2 border-b border-gray-300 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Loại đặt lịch: </span>
-                                <span>{patient.type}</span>
-                            </li>
-                            <li className="py-2 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">
-                                    {(patient.specialtyId && "Chuyên khoa:") || (patient.packageId && "Gói khám:") || (patient.doctorId && "Bác sĩ:")}{" "}
-                                </span>
-                                <span>
-                                    {(patient.specialtyId && patient.specialty.name) ||
-                                        (patient.packageId && patient.package.name) ||
-                                        (patient.doctorId && patient.doctor.firstname + " " + patient.doctor.lastname)}
-                                </span>
-                            </li>
-                            <li className="py-2 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Giá khám: </span>
-                                <span>
-                                    {(patient.specialtyId && patient.doctor.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")) ||
-                                        (patient.packageId && patient.package.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."))}{" "}
-                                    VNĐ
-                                </span>
-                            </li>
-                            <li className="py-2 flex items-center gap-3 pr-3">
-                                <span className="text-base text-gray-900 font-medium">Bác sĩ phụ trách:</span>
-                                <span>{patient.doctorId && patient.doctor.firstname + " " + patient.doctor.lastname}</span>
-                            </li>
-                        </ul>
-                    </div>
+                    <button onClick={handleRefusePatient} className="px-4 py-2 bg-primary rounded-lg text-white font-medium">
+                        Xác nhận
+                    </button>
                 </div>
             </div>
         </div>
     );
 };
 
-export default DoctorManagePatient;
+export default RoleDoctorManagePatient;

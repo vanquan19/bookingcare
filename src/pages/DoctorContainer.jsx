@@ -1,13 +1,15 @@
 import { Link, Navigate, Outlet } from "react-router-dom";
 import logo from "../assets/images/header_logo.png";
-import { LuArrowLeftFromLine, LuCalendar, LuLibrary, LuMessageCircle, LuPackage, LuPieChart, LuUser, LuUserPlus, LuUsers, LuUserX2 } from "react-icons/lu";
+import { LuArrowLeftFromLine, LuBell, LuCalendar, LuLibrary, LuMessageCircle, LuPackage, LuPieChart, LuUser, LuUserPlus, LuUsers, LuUserX2 } from "react-icons/lu";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../features/authSlide";
 import { HomeIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import socket from "../configs/socket.io";
+import { CiBellOn } from "react-icons/ci";
 const DoctorContainer = () => {
     const [newBooking, setNewBooking] = useState(0);
+    const [notifications, setNotifications] = useState([]);
     const clinicName = useSelector((state) => state.auth.data.clinicName);
     const dispatch = useDispatch();
     const handleLogout = () => {
@@ -26,6 +28,21 @@ const DoctorContainer = () => {
             setNewBooking(data.unRead);
         });
     }, [socket]);
+
+    const displayNotification = ({ senderName, type, content }) => {
+        const action = type === "booking" ? "đã đặt lịch khám" : "đã hủy lịch khám";
+        return (
+            <div className="flex items-center p-2 space-x-2 bg-gray-100 rounded-lg dark:bg-gray-700">
+                <LuUserPlus className="w-8 h-8 text-blue-500" />
+                <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{senderName}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {action} {content}
+                    </p>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <>
@@ -53,27 +70,13 @@ const DoctorContainer = () => {
                             <span className="font-bold text-primary text-lg">{clinicName}</span>
                         </a>
                         <ul className="space-y-2 font-medium">
-                            <li>
+                            {/* <li>
                                 <Link to="/doctor" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                     <LuPieChart className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                                     <span className="ms-3">Thống kê</span>
                                 </Link>
-                            </li>
-                            {/* <li>
-                            <Link to="/doctor/schedule" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                                <LuCalendar className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-                                <span className="flex-1 ms-3 whitespace-nowrap">Quản lý lịch khám</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link to="/doctor/chat" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                                <LuMessageCircle className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-                                <span className="flex-1 ms-3 whitespace-nowrap">Tin Nhắn</span>
-                                <span className="inline-flex items-center justify-center w-3 h-3 p-3 ms-3 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300">
-                                    3
-                                </span>
-                            </Link>
-                        </li> */}
+                            </li> */}
+
                             <li>
                                 <Link to="/doctor/patient" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                     <LuUsers className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
@@ -102,7 +105,13 @@ const DoctorContainer = () => {
                             <li>
                                 <Link to="/doctor/infomation-clinic" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                     <HomeIcon className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-                                    <span className="flex-1 ms-3 whitespace-nowrap">Thông tin phòng khám</span>
+                                    <span className="flex-1 ms-3 whitespace-nowrap">Mô tả phòng khám</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/doctor/notification" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                    <LuBell className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                                    <span className="flex-1 ms-3 whitespace-nowrap">Thông báo</span>
                                 </Link>
                             </li>
                             <li>
@@ -123,7 +132,7 @@ const DoctorContainer = () => {
                         </a>
                         <ul className="space-y-2 font-medium">
                             <li>
-                                <Link to="/doctor" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                <Link to="/doctor/patient-doctor" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                     <LuUsers className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                                     <span className="ms-3">Quản lý bệnh nhân</span>
                                 </Link>
@@ -133,6 +142,14 @@ const DoctorContainer = () => {
                                     <LuCalendar className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                                     <span className="flex-1 ms-3 whitespace-nowrap">Lịch khám</span>
                                 </Link>
+                            </li>
+                            <li className="w-full">
+                                <button
+                                    onClick={() => handleLogout()}
+                                    className="flex w-full text-left items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                    <LuArrowLeftFromLine className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                                    <span className="flex-1 ms-3 whitespace-nowrap">Đăng xuất</span>
+                                </button>
                             </li>
                         </ul>
                     </div>

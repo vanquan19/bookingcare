@@ -3,6 +3,7 @@ import { Heading3, Heading5, Heading6, Paragraph } from "./Text";
 import { LuMoveRight } from "react-icons/lu";
 import { GoDotFill } from "react-icons/go";
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 const ListTopNewsCard = ({ top3News, url, firstNews }) => {
     return (
@@ -15,15 +16,20 @@ const ListTopNewsCard = ({ top3News, url, firstNews }) => {
 
 const MainNewsCard = ({ news, url }) => {
     return (
-        <a href={`${url[news.from]}?id=${news.id}`} className="col-span-2">
+        <a href={`${news.link}`} className="col-span-2">
             <section className="flex gap-2 flex-col group">
-                <img src={news.image} alt={news.title} className="w-full rounded-md max-h-96 h-full" />
+                <img src={news["image_url"]} alt={news.title} className="w-full rounded-md max-h-96 h-full" />
                 <Heading3 className="group-hover:text-primary transotion-all">{news.title}</Heading3>
-                <Paragraph className="text-justify line-clamp-4">{news.shortDescription}</Paragraph>
+                <Paragraph className="text-justify">
+                    <span className="text-gray-900 font-medium block mb-2 line-clamp-4">{news.description}</span>
+
+                    <span className="text-gray-700 line-clamp-6">{news.content}</span>
+                </Paragraph>
+
                 <div className="flex items-center gap-1">
                     <CiCalendar className="size-5" />
                     <span className="font-semibold">
-                        {news.timestamp} - {news.author}
+                        {news.pubDate} - {news.source_name}
                     </span>
                 </div>
             </section>
@@ -52,37 +58,39 @@ const SecondNewsCard = ({ news, url, index }) => {
     );
 };
 
-const TopNewsCard = ({ news, key, index, url }) => {
+const TopNewsCard = ({ news }) => {
     return (
-        <div className="flex gap-4 group md:cursor-pointer">
-            <img src={news.image} alt={news.title} className="rounded-md w-2/5" />
-            <div className="flex flex-col">
-                <div className="flex items-center gap-1">
-                    <GoDotFill className="fill-yellow-500" />
-                    <span>{news.from}</span>
-                </div>
-                <Heading6 className="line-clamp-2 group-hover:text-primary transition-all">{news.title}</Heading6>
-                <div className="flex items-center gap-1">
-                    <CiCalendar className="fill-gray-900" />
-                    <span className="font-medium text-gray-600">{news.timestamp}</span>
+        <Link to={news.link}>
+            <div className="flex gap-4 group md:cursor-pointer">
+                <img src={news["image_url"]} alt={news.title} className="rounded-md w-2/5" />
+                <div className="flex flex-col">
+                    <div className="flex items-center gap-1">
+                        <GoDotFill className="fill-yellow-500" />
+                        <span>{news.source_name}</span>
+                    </div>
+                    <Heading6 className="line-clamp-2 group-hover:text-primary transition-all">{news.title}</Heading6>
+                    <div className="flex items-center gap-1">
+                        <CiCalendar className="fill-gray-900" />
+                        <span className="font-medium text-gray-600">{news.pubDate}</span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 };
 
 const OtherNewsCard = ({ news, url, key, index, handleScroll }) => {
     return (
-        <section key={index} className="relative w-full rounded-md overflow-hidden border-2 border-transparent bg-white min-w-60  hover:border-primary transition-all group">
-            <a href={`${url[news.from]}?id=${news.id}`}>
-                <img src={news.image} alt={news.title} className="w-full" />
+        <section key={index} className="relative w-full rounded-md overflow-hidden border-2 border-transparent bg-white min-w-60 hover:border-primary transition-all group">
+            <a href={news.link}>
+                <img src={news.image_url} alt={news.title} className="w-full h-56" />
                 <div className="bottom-0 p-2">
                     <div className="flex gap-1 items-center">
                         <GoDotFill className="fill-yellow-500" />
-                        <span className=" font-semibold text-gray-600 text-sm">{news.from}</span>
+                        <span className=" font-semibold text-gray-600 text-sm">{news.source_name}</span>
                     </div>
                     <Heading6 className=" line-clamp-2 group-hover:text-primary transition-all">{news.title}</Heading6>
-                    <Paragraph className=" line-clamp-2 text-sm">{news.shortDescription}</Paragraph>
+                    <Paragraph className=" line-clamp-2 text-sm">{news.description}</Paragraph>
                     <button className=" flex items-center gap-2 ">
                         <span className="text-primary text-base">Xem thêm</span> <LuMoveRight className="stroke-primary size-6 mt-1" />
                     </button>

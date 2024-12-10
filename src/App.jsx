@@ -28,7 +28,7 @@ import ProtectedRoute from "./utils/ProtectedRoute.jsx";
 import "react-toastify/dist/ReactToastify.css";
 import DoctorContainer from "./pages/DoctorContainer.jsx";
 import DoctorLogin from "./pages/DoctorLogin.jsx";
-import { ListDoctor, ListMedicalPakage, ListSpecialty, MedicalBookingForm, SelectPatientProfile } from "./components/MedicalComponents.jsx";
+import { BookingContainer, BookingPackage, ListDoctor, ListMedicalPakage, ListSpecialty, MedicalBookingForm, PickerDate, SelectPatientProfile } from "./components/MedicalComponents.jsx";
 import DoctorManageSpecialty from "./pages/DoctorManageSpecialty.jsx";
 import DoctorManagePakage from "./pages/DoctorManagePakage.jsx";
 import DoctorManageSchedule from "./pages/DoctorManageSchedule.jsx";
@@ -38,6 +38,18 @@ import DoctorChat from "./pages/DoctorChat.jsx";
 import DoctorAnalysis from "./pages/DoctorAnalysis.jsx";
 import ViewDetailClinic from "./pages/ViewDetailClinic.jsx";
 import AddNewProfilePatient from "./pages/AddNewProfilePatient.jsx";
+import HistoryBooking, { EditPatientProfile } from "./pages/HistoryBooking.jsx";
+import DoctorNotification from "./pages/DoctorNotification.jsx";
+import RoleDoctorManagePatient from "./pages/DoctorManagePatient.roleDoctor.jsx";
+import ManageInstruction from "./pages/Admin_manage_instruction.jsx";
+import ManageQuestionAndAnwser from "./pages/QuestionAndAnswer.jsx";
+import ManageAboutBooking from "./pages/Admin_manage_contract.jsx";
+import ManageContract from "./pages/Admin_manage_contract.jsx";
+import InstructionBooking from "./pages/InstructionBooking.jsx";
+import QuestionAndAnwser from "./pages/QuestionAndAnswer.client.jsx";
+import Coorperation from "./pages/Cooperation.jsx";
+import AboutBooking from "./pages/AboutBooking.jsx";
+import InfomationClinic from "./pages/InfomationClinic.jsx";
 
 const router = createBrowserRouter([
     {
@@ -52,6 +64,15 @@ const router = createBrowserRouter([
             {
                 path: "them-ho-so-benh-nhan",
                 element: <ProtectedRoute component={AddNewProfilePatient} navigate="/" />,
+            },
+            {
+                path: "sua-ho-so-benh-nhan",
+                element: <ProtectedRoute component={EditPatientProfile} navigate="/" />,
+            },
+
+            {
+                path: "lich-su-kham-benh",
+                element: <ProtectedRoute component={HistoryBooking} navigate="/" />,
             },
             {
                 path: "chi-tiet-phong-kham",
@@ -128,25 +149,50 @@ const router = createBrowserRouter([
                 element: <MedicalBookingForm />,
             },
             {
-                path: "chon-ho-so",
-                element: <SelectPatientProfile />,
-            },
-            {
                 path: "dat-kham-theo-chuyen-khoa",
-                element: <ListSpecialty />,
-            },
-            {
-                path: "dat-kham-theo-bac-si",
-                element: <ListDoctor />,
+                element: <BookingContainer />,
+                children: [
+                    {
+                        index: true,
+                        element: <ListSpecialty />,
+                    },
+                    {
+                        path: "chon-bac-si",
+                        element: <ListDoctor />,
+                    },
+                    {
+                        path: "chon-ngay",
+                        element: <PickerDate />,
+                    },
+                    {
+                        path: "chon-ho-so",
+                        element: <SelectPatientProfile />,
+                    },
+                ],
             },
             {
                 path: "dat-kham-theo-goi-kham",
-                element: <ListMedicalPakage />,
+                element: <BookingPackage />,
+                children: [
+                    {
+                        index: true,
+                        element: <ListMedicalPakage />,
+                    },
+                    {
+                        path: "chon-ngay",
+                        element: <PickerDate />,
+                    },
+                    {
+                        path: "chon-ho-so",
+                        element: <SelectPatientProfile />,
+                    },
+                ],
             },
             {
                 path: "kham-suc-khoe-doanh-nghiep",
                 element: <HealthCheckForBusiness />,
             },
+
             {
                 path: "tin-tuc",
                 element: <News />,
@@ -173,37 +219,23 @@ const router = createBrowserRouter([
                 path: "huong-dan",
                 children: [
                     {
-                        index: true,
-                        path: "cai-dat-ung-dung",
-                    },
-                    {
                         path: "dat-lich-kham",
+                        element: <InstructionBooking />,
                     },
                     {
-                        path: "tu-van-kham-benh-qua-video",
-                    },
-                    {
-                        path: "quy-trinh-hoan-phi",
-                    },
-                    {
-                        path: "cau-hoi-thuong-gap",
-                    },
-                    {
-                        path: "quy-trinh-di-kham",
+                        path: "hoi-dap",
+                        element: <QuestionAndAnwser />,
                     },
                 ],
             },
             {
                 path: "lien-he-hop-tac",
+                element: <Coorperation />,
             },
-            {
-                path: "hop-tac-quang-cao",
-            },
+
             {
                 path: "gioi-thieu",
-            },
-            {
-                path: "tuyen-dung",
+                element: <AboutBooking />,
             },
         ],
     },
@@ -219,9 +251,9 @@ const router = createBrowserRouter([
         path: "/admin",
         element: <ProtectedRoute component={AdminContainer} navigate="/admin/login" />,
         children: [
-            {
-                index: true,
-            },
+            // {
+            //     index: true,
+            // },
             {
                 path: "clinic-management",
                 element: <ClinicManageContainer />,
@@ -230,22 +262,19 @@ const router = createBrowserRouter([
                         index: true,
                         element: <Clinicmanagement />,
                     },
-                    {
-                        path: "contract",
-                    },
                 ],
             },
             {
-                path: "doctor-management",
+                path: "instruction",
+                element: <ManageInstruction />,
             },
             {
-                path: "service-management",
+                path: "question&answer",
+                element: <ManageQuestionAndAnwser />,
             },
             {
-                path: "chat",
-            },
-            {
-                path: "news-management",
+                path: "contract",
+                element: <ManageContract />,
             },
         ],
     },
@@ -253,9 +282,13 @@ const router = createBrowserRouter([
         path: "/doctor",
         element: <ProtectedRoute component={DoctorContainer} navigate="/doctor/login" />,
         children: [
+            // {
+            //     index: true,
+            //     element: <DoctorAnalysis />,
+            // },
             {
-                index: true,
-                element: <DoctorAnalysis />,
+                path: "notification",
+                element: <DoctorNotification />,
             },
             {
                 path: "schedule",
@@ -265,6 +298,7 @@ const router = createBrowserRouter([
                 path: "chat",
                 element: <DoctorChat />,
             },
+
             {
                 path: "specialty",
                 element: <DoctorManageSpecialty />,
@@ -274,12 +308,20 @@ const router = createBrowserRouter([
                 element: <DoctorManagePakage />,
             },
             {
+                path: "patient-doctor",
+                element: <RoleDoctorManagePatient />,
+            },
+            {
                 path: "staff",
                 element: <DoctorManageStaff />,
             },
             {
                 path: "patient",
                 element: <DoctorManagePatient />,
+            },
+            {
+                path: "infomation-clinic",
+                element: <InfomationClinic />,
             },
         ],
     },

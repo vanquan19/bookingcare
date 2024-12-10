@@ -2,8 +2,8 @@ import React from "react";
 
 export default function Paginate({ total, currentPage, setPage }) {
     return (
-        <nav aria-label="Page navigation example">
-            <ul className="list-style-none flex">
+        <nav aria-label="Page navigation example w-full flex">
+            <ul className="list-style-none flex w-fit mx-auto">
                 {total > 0 && (
                     <li className="bg-white mx-2 h-9 w-9 flex items-center justify-center rounded">
                         <button

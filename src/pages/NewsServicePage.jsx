@@ -1,521 +1,79 @@
+import { useEffect, useState } from "react";
 import { ListTopNewsCard, OtherNewsCard, TopNewsCard } from "../components/NewsComponents";
-
+import { getData } from "../utils/fetchData";
+import Paginate from "../components/Paginate";
+const LIMIT = 18;
 const NewsServicePage = () => {
-    const listNews = [
-        {
-            //form data for parent element
-            id: 1,
-            title: "Đi khám bệnh từ nửa đêm, cuộc đua giữa thời gian và sức khỏe",
-            shortDescription:
-                "Báo Tuổi Trẻ đưa tin, để kịp lấy số thứ tự khám tại các bệnh viện tuyến đầu TPHCM, nhiều người dân phải đi khám từ nửa đêm, đến sớm và trải chiếu nằm chờ, với hy vọng lấy được số nhỏ, kịp chuyến xe về quê. Trong bối cảnh này, việc sử dụng các ứng dụng đặt khám giúp giải quyết tình trạng chờ đợi, đơn giản hóa quy trình đi khám cho người dân. Tìm hiểu tiện ích đặt khám nhanh - lấy số trước tại đây!",
-            type: "document",
-            description: [
-                "Mỗi đêm, hàng trăm ngàn người bệnh đổ về các bệnh viện lớn, trải chiếu nằm chờ từ nửa đêm đến giờ xếp hàng, lấy số thứ tự. Họ mang theo nỗi lo lắng về sức khỏe và hy vọng vào kết quả khám bệnh, nhưng phải đối mặt với những giờ phút chờ đợi mệt mỏi. Nhiều người bệnh và thân nhân, đặc biệt là những người ở các tỉnh xa như Cà Mau, Ninh Thuận phải thức dậy từ rất sớm, thậm chí là đi khám từ nửa đêm. Trước thực trạng này, ứng dụng đặt khám là một giải pháp thông minh. Trong số đó, Medpro nổi bật với giải pháp toàn diện, giúp người dân không cần phải đến bệnh viện từ sáng sớm, mang lại sự an tâm với hơn 200 cơ sở y tế trên toàn quốc.",
-            ],
-            image: "https://medpro.vn/_next/image?url=https%3A%2F%2Fcms.medpro.com.vn%2Fuploads%2F1723958664719_3d444fc91d.png&w=1920&q=100",
-            timestamp: "18/08/2024, 12:33",
-            author: "Mộc Thanh",
-            from: "Tin dịch vụ",
-            // end form data for parent element
+    const [page, setPage] = useState(1);
 
-            ///form data for content element (get by id);
-            content: [
-                {
-                    title: "Khó khăn của người bệnh khi đi khám từ nửa đêm",
-                    type: "document",
-                    description: [
-                        "Theo bản tin phóng sự từ Báo Tuổi Trẻ, việc đi khám từ nửa đêm là viễn cảnh quen thuộc ở các bệnh viện công tuyến đầu TPHCM. Hàng đêm, khi nhiều người còn say giấc ngủ thì người bệnh và thân nhân đã thức dậy, di chuyển đến TPHCM để xếp hàng, chờ bốc số thứ tự khám bệnh. Khung cảnh quen thuộc này diễn ra hàng ngày tại các bệnh viện lớn như Chợ Rẫy, Bình Dân, Ung Bướu, BV Đại học Y Dược TPHCM,... Những người bệnh từ các tỉnh xa như Cà Mau hay Trà Vinh, phải vượt hàng trăm cây số, ngồi xe đò suốt nhiều giờ liền để có mặt tại bệnh viện khi trời còn chưa sáng.",
-                    ],
-                    content: [
-                        {
-                            title: "Hàng dài xếp hàng chờ lấy số trước bình minh",
-                            type: "document",
-                            description: [
-                                "Trước bình minh, người bệnh đã xếp hàng dài chờ khám tại các bệnh viện lớn ở TP.HCM, ngồi trên ghế lạnh hoặc trải chiếu nằm đợi. Gương mặt họ hiện rõ sự mệt mỏi, đặc biệt là những người từ tỉnh xa. Cái lạnh của đêm không làm họ nản lòng, chỉ mong được khám sớm để tránh phải chờ đợi cả ngày.",
-                                'Khi chỉ còn 30 phút nữa đến 0h giờ bốc số tại BV Chợ Rẫy, hàng người đã ngồi kín hơn nửa sảnh. Bà Thanh Tùng (54 tuổi, Ninh Thuận) chia sẻ: "Đi sớm vậy mà vẫn chưa phải người đến sớm nhất". Bà cũng nói thêm, chỉ cần một tiếng nữa, hàng người sẽ kéo dài hết hành lang.',
-                                "Phóng viên Báo Tuổi Trẻ ghi nhận, những người quen thuộc với việc khám bệnh đã có kinh nghiệm, nhưng những người lần đầu từ quê lên thì gặp nhiều khó khăn. Một số người bệnh đã đến BV Ung Bướu từ 23h nhưng phải đứng chờ ngoài cổng vì 2h30 mới mở. Tại BV Bình Dân, dù vừa hơn 0h, số thứ tự đã lên đến 18.",
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-xep-hang-luc-0gio-tai-bv-cho-ray.jpeg",
-                                description: "Người dân xếp hàng chơ bốc số lúc 0h tại BV Chợ Rẫy. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                        {
-                            title: "Thời gian và chi phí - Bài toán khó cho người bệnh",
-                            type: "document",
-                            description: [
-                                'Thời gian chờ đợi không chỉ là thử thách về thể chất mà còn gây áp lực tinh thần, đặc biệt với những người từ xa đến TP.HCM khám bệnh. Để tiết kiệm chi phí, nhiều người không thuê phòng nghỉ, mang theo đồ ăn tự chuẩn bị và nằm đợi ở sảnh. Mỗi chuyến khám bệnh là một cuộc "đánh cược" với sức khỏe và tài chính gia đình.',
-                                'Một người đàn ông từ xã Đông Hải, huyện Duyên Hải, chia sẻ rằng dù đã tính toán để đến đúng giờ BV Bình Dân phát số, anh vẫn chỉ lấy được số 19. Lần trước, anh chờ đến trưa mới được khám vì lấy số 28. Anh than thở: “Bệnh tật không mệt bằng việc đi đi về về mấy trăm cây số. Hy vọng lần này mổ xong luôn để khỏi phải tái khám".',
-                                'Bà Xuân, bị suy thận hai năm, đã quen với cảnh đi khám từ nữa đêm. Khi con bà cầm phiếu số 106, bà không giấu nổi sự buồn bã, biết rằng có thể phải chờ đến hôm sau. Sau khi lấy số, hai mẹ con tìm chỗ ngủ trong khu vực đã kín người, cố gắng tiết kiệm tối đa bằng cách mang theo đồ ăn và không thuê trọ. Bà nói: “Còn phải đi khám dài dài, cố mà tiết kiệm, đói thì ăn cơm cháy rồi uống nước, về nhà mới ăn uống thoải mái được".',
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-trai-chieu-nam-tai-bv.jpeg",
-                                description: "Người dân trải chiếu nằm chờ ở sảnh bệnh viện để tiết kiệm chi phí. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                    ],
-                },
-                {
-                    title: "Ứng dụng đặt khám - Giải pháp y tế số, kết nối người dân với các bệnh viện hàng đầu",
-                    type: "document",
-                    description: [
-                        "Trước những khó khăn và bất tiện trong quá trình khám chữa bệnh, đặt khám qua App (ứng dụng) đã xuất hiện như một giải pháp tối ưu, giúp người bệnh tiết kiệm thời gian và chi phí. Những ứng dụng này không chỉ cho phép đặt lịch khám mà còn giúp lấy số thứ tự trước, tránh tình trạng phải đi từ nửa đêm và chờ đợi lâu.",
-                        "Trong xu hướng chuyển đổi số, Medpro nổi bật là một trong những ứng dụng hàng đầu trong lĩnh vực y tế số, cho phép đặt lịch khám tại hơn 200 cơ sở y tế trên toàn quốc. Ứng dụng này mang đến nhiều tiện ích như nhắc nhở lịch hẹn, hỗ trợ thanh toán trực tuyến, và tư vấn sức khỏe qua video với bác sĩ chuyên khoa. Người dùng chỉ cần đặt lịch và đến thẳng phòng khám, giúp rút ngắn quy trình và tiết kiệm thời gian đáng kể",
-                        "Medpro không chỉ phổ biến trên Apple Store và Google Play mà còn được đông đảo người dùng tin tưởng. Hiện Medpro là đối tác chiến lược của nhiều bệnh viện lớn như Bệnh viện Đại học Y Dược TPHCM, Chợ Rẫy, Nhi đồng 1, Bệnh viện Mắt, Da liễu TPHCM,... Với phương châm vì sức khỏe cộng đồng, Medpro đang không ngừng nâng cao chất lượng dịch vụ y tế, giảm bớt gánh nặng cho người bệnh và trở thành người bạn đồng hành đáng tin cậy trong hành trình chăm sóc sức khỏe.",
-                        "Đặt khám trên 200 cơ sở y tế trên toàn quốc: https://medpro.vn/co-so-y-te",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                },
-                {
-                    title: "Kết luận",
-                    type: "document",
-                    description: [
-                        "Trong bối cảnh những khó khăn và bất tiện khi đi khám bệnh giữa đêm khuya vẫn còn hiện hữu, việc sử dụng các ứng dụng đặt khám không chỉ mang lại sự tiện lợi mà còn giúp cải thiện đáng kể chất lượng cuộc sống cho người bệnh. Thay vì phải đi khám từ nửa đêm và chờ đợi mệt mỏi, người bệnh giờ đây có thể dễ dàng đặt khám nhanh - lấy số trước, tiết kiệm thời gian và chi phí. Với sự đồng hành của Medpro, người bệnh có thể yên tâm hơn trong hành trình chăm sóc sức khỏe, từ đó tập trung vào việc điều trị và phục hồi, không còn bị gánh nặng bởi những khó khăn trong việc khám chữa bệnh.",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                    content: {
-                        title: "Nguồn",
-                        type: "number",
-                        description: [
-                            "Thông tin về việc người bệnh đi khám từ nửa đêm, xếp hàng dài tại các bệnh viện - Báo Tuổi Trẻ Online: https://tuoitre.vn/di-kham-benh-luc-nua-dem-20240808100358225.htm",
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            //form data for parent element
-            id: 2,
-            title: "Đi khám bệnh từ nửa đêm, cuộc đua giữa thời gian và sức khỏe",
-            shortDescription:
-                "Báo Tuổi Trẻ đưa tin, để kịp lấy số thứ tự khám tại các bệnh viện tuyến đầu TPHCM, nhiều người dân phải đi khám từ nửa đêm, đến sớm và trải chiếu nằm chờ, với hy vọng lấy được số nhỏ, kịp chuyến xe về quê. Trong bối cảnh này, việc sử dụng các ứng dụng đặt khám giúp giải quyết tình trạng chờ đợi, đơn giản hóa quy trình đi khám cho người dân. Tìm hiểu tiện ích đặt khám nhanh - lấy số trước tại đây!",
-            type: "document",
-            description: [
-                "Mỗi đêm, hàng trăm ngàn người bệnh đổ về các bệnh viện lớn, trải chiếu nằm chờ từ nửa đêm đến giờ xếp hàng, lấy số thứ tự. Họ mang theo nỗi lo lắng về sức khỏe và hy vọng vào kết quả khám bệnh, nhưng phải đối mặt với những giờ phút chờ đợi mệt mỏi. Nhiều người bệnh và thân nhân, đặc biệt là những người ở các tỉnh xa như Cà Mau, Ninh Thuận phải thức dậy từ rất sớm, thậm chí là đi khám từ nửa đêm. Trước thực trạng này, ứng dụng đặt khám là một giải pháp thông minh. Trong số đó, Medpro nổi bật với giải pháp toàn diện, giúp người dân không cần phải đến bệnh viện từ sáng sớm, mang lại sự an tâm với hơn 200 cơ sở y tế trên toàn quốc.",
-            ],
-            image: "https://cdn.medpro.vn/medpro-production/medpro/topics/dieu-tri-cho-tre-benh-soi-tai-bv-nhi-dong-1.jpg",
-            timestamp: "18/08/2024, 12:33",
-            author: "Mộc Thanh",
-            from: "Tin dịch vụ",
-            // end form data for parent element
+    const [topNews, setTopNews] = useState([]);
+    const [firstNews, setFirstNews] = useState({});
+    const [news, setNews] = useState([]);
+    const [totalPage, setToltalPage] = useState(0);
 
-            ///form data for content element (get by id);
-            content: [
-                {
-                    title: "Khó khăn của người bệnh khi đi khám từ nửa đêm",
-                    type: "document",
-                    description: [
-                        "Theo bản tin phóng sự từ Báo Tuổi Trẻ, việc đi khám từ nửa đêm là viễn cảnh quen thuộc ở các bệnh viện công tuyến đầu TPHCM. Hàng đêm, khi nhiều người còn say giấc ngủ thì người bệnh và thân nhân đã thức dậy, di chuyển đến TPHCM để xếp hàng, chờ bốc số thứ tự khám bệnh. Khung cảnh quen thuộc này diễn ra hàng ngày tại các bệnh viện lớn như Chợ Rẫy, Bình Dân, Ung Bướu, BV Đại học Y Dược TPHCM,... Những người bệnh từ các tỉnh xa như Cà Mau hay Trà Vinh, phải vượt hàng trăm cây số, ngồi xe đò suốt nhiều giờ liền để có mặt tại bệnh viện khi trời còn chưa sáng.",
-                    ],
-                    content: [
-                        {
-                            title: "Hàng dài xếp hàng chờ lấy số trước bình minh",
-                            type: "document",
-                            description: [
-                                "Trước bình minh, người bệnh đã xếp hàng dài chờ khám tại các bệnh viện lớn ở TP.HCM, ngồi trên ghế lạnh hoặc trải chiếu nằm đợi. Gương mặt họ hiện rõ sự mệt mỏi, đặc biệt là những người từ tỉnh xa. Cái lạnh của đêm không làm họ nản lòng, chỉ mong được khám sớm để tránh phải chờ đợi cả ngày.",
-                                'Khi chỉ còn 30 phút nữa đến 0h giờ bốc số tại BV Chợ Rẫy, hàng người đã ngồi kín hơn nửa sảnh. Bà Thanh Tùng (54 tuổi, Ninh Thuận) chia sẻ: "Đi sớm vậy mà vẫn chưa phải người đến sớm nhất". Bà cũng nói thêm, chỉ cần một tiếng nữa, hàng người sẽ kéo dài hết hành lang.',
-                                "Phóng viên Báo Tuổi Trẻ ghi nhận, những người quen thuộc với việc khám bệnh đã có kinh nghiệm, nhưng những người lần đầu từ quê lên thì gặp nhiều khó khăn. Một số người bệnh đã đến BV Ung Bướu từ 23h nhưng phải đứng chờ ngoài cổng vì 2h30 mới mở. Tại BV Bình Dân, dù vừa hơn 0h, số thứ tự đã lên đến 18.",
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-xep-hang-luc-0gio-tai-bv-cho-ray.jpeg",
-                                description: "Người dân xếp hàng chơ bốc số lúc 0h tại BV Chợ Rẫy. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                        {
-                            title: "Thời gian và chi phí - Bài toán khó cho người bệnh",
-                            type: "document",
-                            description: [
-                                'Thời gian chờ đợi không chỉ là thử thách về thể chất mà còn gây áp lực tinh thần, đặc biệt với những người từ xa đến TP.HCM khám bệnh. Để tiết kiệm chi phí, nhiều người không thuê phòng nghỉ, mang theo đồ ăn tự chuẩn bị và nằm đợi ở sảnh. Mỗi chuyến khám bệnh là một cuộc "đánh cược" với sức khỏe và tài chính gia đình.',
-                                'Một người đàn ông từ xã Đông Hải, huyện Duyên Hải, chia sẻ rằng dù đã tính toán để đến đúng giờ BV Bình Dân phát số, anh vẫn chỉ lấy được số 19. Lần trước, anh chờ đến trưa mới được khám vì lấy số 28. Anh than thở: “Bệnh tật không mệt bằng việc đi đi về về mấy trăm cây số. Hy vọng lần này mổ xong luôn để khỏi phải tái khám".',
-                                'Bà Xuân, bị suy thận hai năm, đã quen với cảnh đi khám từ nữa đêm. Khi con bà cầm phiếu số 106, bà không giấu nổi sự buồn bã, biết rằng có thể phải chờ đến hôm sau. Sau khi lấy số, hai mẹ con tìm chỗ ngủ trong khu vực đã kín người, cố gắng tiết kiệm tối đa bằng cách mang theo đồ ăn và không thuê trọ. Bà nói: “Còn phải đi khám dài dài, cố mà tiết kiệm, đói thì ăn cơm cháy rồi uống nước, về nhà mới ăn uống thoải mái được".',
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-trai-chieu-nam-tai-bv.jpeg",
-                                description: "Người dân trải chiếu nằm chờ ở sảnh bệnh viện để tiết kiệm chi phí. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                    ],
-                },
-                {
-                    title: "Ứng dụng đặt khám - Giải pháp y tế số, kết nối người dân với các bệnh viện hàng đầu",
-                    type: "document",
-                    description: [
-                        "Trước những khó khăn và bất tiện trong quá trình khám chữa bệnh, đặt khám qua App (ứng dụng) đã xuất hiện như một giải pháp tối ưu, giúp người bệnh tiết kiệm thời gian và chi phí. Những ứng dụng này không chỉ cho phép đặt lịch khám mà còn giúp lấy số thứ tự trước, tránh tình trạng phải đi từ nửa đêm và chờ đợi lâu.",
-                        "Trong xu hướng chuyển đổi số, Medpro nổi bật là một trong những ứng dụng hàng đầu trong lĩnh vực y tế số, cho phép đặt lịch khám tại hơn 200 cơ sở y tế trên toàn quốc. Ứng dụng này mang đến nhiều tiện ích như nhắc nhở lịch hẹn, hỗ trợ thanh toán trực tuyến, và tư vấn sức khỏe qua video với bác sĩ chuyên khoa. Người dùng chỉ cần đặt lịch và đến thẳng phòng khám, giúp rút ngắn quy trình và tiết kiệm thời gian đáng kể",
-                        "Medpro không chỉ phổ biến trên Apple Store và Google Play mà còn được đông đảo người dùng tin tưởng. Hiện Medpro là đối tác chiến lược của nhiều bệnh viện lớn như Bệnh viện Đại học Y Dược TPHCM, Chợ Rẫy, Nhi đồng 1, Bệnh viện Mắt, Da liễu TPHCM,... Với phương châm vì sức khỏe cộng đồng, Medpro đang không ngừng nâng cao chất lượng dịch vụ y tế, giảm bớt gánh nặng cho người bệnh và trở thành người bạn đồng hành đáng tin cậy trong hành trình chăm sóc sức khỏe.",
-                        "Đặt khám trên 200 cơ sở y tế trên toàn quốc: https://medpro.vn/co-so-y-te",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                },
-                {
-                    title: "Kết luận",
-                    type: "document",
-                    description: [
-                        "Trong bối cảnh những khó khăn và bất tiện khi đi khám bệnh giữa đêm khuya vẫn còn hiện hữu, việc sử dụng các ứng dụng đặt khám không chỉ mang lại sự tiện lợi mà còn giúp cải thiện đáng kể chất lượng cuộc sống cho người bệnh. Thay vì phải đi khám từ nửa đêm và chờ đợi mệt mỏi, người bệnh giờ đây có thể dễ dàng đặt khám nhanh - lấy số trước, tiết kiệm thời gian và chi phí. Với sự đồng hành của Medpro, người bệnh có thể yên tâm hơn trong hành trình chăm sóc sức khỏe, từ đó tập trung vào việc điều trị và phục hồi, không còn bị gánh nặng bởi những khó khăn trong việc khám chữa bệnh.",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                    content: {
-                        title: "Nguồn",
-                        type: "number",
-                        description: [
-                            "Thông tin về việc người bệnh đi khám từ nửa đêm, xếp hàng dài tại các bệnh viện - Báo Tuổi Trẻ Online: https://tuoitre.vn/di-kham-benh-luc-nua-dem-20240808100358225.htm",
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            //form data for parent element
-            id: 3,
-            title: "Đi khám bệnh từ nửa đêm, cuộc đua giữa thời gian và sức khỏe",
-            shortDescription:
-                "Báo Tuổi Trẻ đưa tin, để kịp lấy số thứ tự khám tại các bệnh viện tuyến đầu TPHCM, nhiều người dân phải đi khám từ nửa đêm, đến sớm và trải chiếu nằm chờ, với hy vọng lấy được số nhỏ, kịp chuyến xe về quê. Trong bối cảnh này, việc sử dụng các ứng dụng đặt khám giúp giải quyết tình trạng chờ đợi, đơn giản hóa quy trình đi khám cho người dân. Tìm hiểu tiện ích đặt khám nhanh - lấy số trước tại đây!",
-            type: "document",
-            description: [
-                "Mỗi đêm, hàng trăm ngàn người bệnh đổ về các bệnh viện lớn, trải chiếu nằm chờ từ nửa đêm đến giờ xếp hàng, lấy số thứ tự. Họ mang theo nỗi lo lắng về sức khỏe và hy vọng vào kết quả khám bệnh, nhưng phải đối mặt với những giờ phút chờ đợi mệt mỏi. Nhiều người bệnh và thân nhân, đặc biệt là những người ở các tỉnh xa như Cà Mau, Ninh Thuận phải thức dậy từ rất sớm, thậm chí là đi khám từ nửa đêm. Trước thực trạng này, ứng dụng đặt khám là một giải pháp thông minh. Trong số đó, Medpro nổi bật với giải pháp toàn diện, giúp người dân không cần phải đến bệnh viện từ sáng sớm, mang lại sự an tâm với hơn 200 cơ sở y tế trên toàn quốc.",
-            ],
-            image: "https://cdn.medpro.vn/medpro-production/medpro/topics/dieu-tri-cho-tre-benh-soi-tai-bv-nhi-dong-1.jpg",
-            timestamp: "18/08/2024, 12:33",
-            author: "Mộc Thanh",
-            from: "Tin dịch vụ",
-            // end form data for parent element
-
-            ///form data for content element (get by id);
-            content: [
-                {
-                    title: "Khó khăn của người bệnh khi đi khám từ nửa đêm",
-                    type: "document",
-                    description: [
-                        "Theo bản tin phóng sự từ Báo Tuổi Trẻ, việc đi khám từ nửa đêm là viễn cảnh quen thuộc ở các bệnh viện công tuyến đầu TPHCM. Hàng đêm, khi nhiều người còn say giấc ngủ thì người bệnh và thân nhân đã thức dậy, di chuyển đến TPHCM để xếp hàng, chờ bốc số thứ tự khám bệnh. Khung cảnh quen thuộc này diễn ra hàng ngày tại các bệnh viện lớn như Chợ Rẫy, Bình Dân, Ung Bướu, BV Đại học Y Dược TPHCM,... Những người bệnh từ các tỉnh xa như Cà Mau hay Trà Vinh, phải vượt hàng trăm cây số, ngồi xe đò suốt nhiều giờ liền để có mặt tại bệnh viện khi trời còn chưa sáng.",
-                    ],
-                    content: [
-                        {
-                            title: "Hàng dài xếp hàng chờ lấy số trước bình minh",
-                            type: "document",
-                            description: [
-                                "Trước bình minh, người bệnh đã xếp hàng dài chờ khám tại các bệnh viện lớn ở TP.HCM, ngồi trên ghế lạnh hoặc trải chiếu nằm đợi. Gương mặt họ hiện rõ sự mệt mỏi, đặc biệt là những người từ tỉnh xa. Cái lạnh của đêm không làm họ nản lòng, chỉ mong được khám sớm để tránh phải chờ đợi cả ngày.",
-                                'Khi chỉ còn 30 phút nữa đến 0h giờ bốc số tại BV Chợ Rẫy, hàng người đã ngồi kín hơn nửa sảnh. Bà Thanh Tùng (54 tuổi, Ninh Thuận) chia sẻ: "Đi sớm vậy mà vẫn chưa phải người đến sớm nhất". Bà cũng nói thêm, chỉ cần một tiếng nữa, hàng người sẽ kéo dài hết hành lang.',
-                                "Phóng viên Báo Tuổi Trẻ ghi nhận, những người quen thuộc với việc khám bệnh đã có kinh nghiệm, nhưng những người lần đầu từ quê lên thì gặp nhiều khó khăn. Một số người bệnh đã đến BV Ung Bướu từ 23h nhưng phải đứng chờ ngoài cổng vì 2h30 mới mở. Tại BV Bình Dân, dù vừa hơn 0h, số thứ tự đã lên đến 18.",
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-xep-hang-luc-0gio-tai-bv-cho-ray.jpeg",
-                                description: "Người dân xếp hàng chơ bốc số lúc 0h tại BV Chợ Rẫy. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                        {
-                            title: "Thời gian và chi phí - Bài toán khó cho người bệnh",
-                            type: "document",
-                            description: [
-                                'Thời gian chờ đợi không chỉ là thử thách về thể chất mà còn gây áp lực tinh thần, đặc biệt với những người từ xa đến TP.HCM khám bệnh. Để tiết kiệm chi phí, nhiều người không thuê phòng nghỉ, mang theo đồ ăn tự chuẩn bị và nằm đợi ở sảnh. Mỗi chuyến khám bệnh là một cuộc "đánh cược" với sức khỏe và tài chính gia đình.',
-                                'Một người đàn ông từ xã Đông Hải, huyện Duyên Hải, chia sẻ rằng dù đã tính toán để đến đúng giờ BV Bình Dân phát số, anh vẫn chỉ lấy được số 19. Lần trước, anh chờ đến trưa mới được khám vì lấy số 28. Anh than thở: “Bệnh tật không mệt bằng việc đi đi về về mấy trăm cây số. Hy vọng lần này mổ xong luôn để khỏi phải tái khám".',
-                                'Bà Xuân, bị suy thận hai năm, đã quen với cảnh đi khám từ nữa đêm. Khi con bà cầm phiếu số 106, bà không giấu nổi sự buồn bã, biết rằng có thể phải chờ đến hôm sau. Sau khi lấy số, hai mẹ con tìm chỗ ngủ trong khu vực đã kín người, cố gắng tiết kiệm tối đa bằng cách mang theo đồ ăn và không thuê trọ. Bà nói: “Còn phải đi khám dài dài, cố mà tiết kiệm, đói thì ăn cơm cháy rồi uống nước, về nhà mới ăn uống thoải mái được".',
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-trai-chieu-nam-tai-bv.jpeg",
-                                description: "Người dân trải chiếu nằm chờ ở sảnh bệnh viện để tiết kiệm chi phí. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                    ],
-                },
-                {
-                    title: "Ứng dụng đặt khám - Giải pháp y tế số, kết nối người dân với các bệnh viện hàng đầu",
-                    type: "document",
-                    description: [
-                        "Trước những khó khăn và bất tiện trong quá trình khám chữa bệnh, đặt khám qua App (ứng dụng) đã xuất hiện như một giải pháp tối ưu, giúp người bệnh tiết kiệm thời gian và chi phí. Những ứng dụng này không chỉ cho phép đặt lịch khám mà còn giúp lấy số thứ tự trước, tránh tình trạng phải đi từ nửa đêm và chờ đợi lâu.",
-                        "Trong xu hướng chuyển đổi số, Medpro nổi bật là một trong những ứng dụng hàng đầu trong lĩnh vực y tế số, cho phép đặt lịch khám tại hơn 200 cơ sở y tế trên toàn quốc. Ứng dụng này mang đến nhiều tiện ích như nhắc nhở lịch hẹn, hỗ trợ thanh toán trực tuyến, và tư vấn sức khỏe qua video với bác sĩ chuyên khoa. Người dùng chỉ cần đặt lịch và đến thẳng phòng khám, giúp rút ngắn quy trình và tiết kiệm thời gian đáng kể",
-                        "Medpro không chỉ phổ biến trên Apple Store và Google Play mà còn được đông đảo người dùng tin tưởng. Hiện Medpro là đối tác chiến lược của nhiều bệnh viện lớn như Bệnh viện Đại học Y Dược TPHCM, Chợ Rẫy, Nhi đồng 1, Bệnh viện Mắt, Da liễu TPHCM,... Với phương châm vì sức khỏe cộng đồng, Medpro đang không ngừng nâng cao chất lượng dịch vụ y tế, giảm bớt gánh nặng cho người bệnh và trở thành người bạn đồng hành đáng tin cậy trong hành trình chăm sóc sức khỏe.",
-                        "Đặt khám trên 200 cơ sở y tế trên toàn quốc: https://medpro.vn/co-so-y-te",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                },
-                {
-                    title: "Kết luận",
-                    type: "document",
-                    description: [
-                        "Trong bối cảnh những khó khăn và bất tiện khi đi khám bệnh giữa đêm khuya vẫn còn hiện hữu, việc sử dụng các ứng dụng đặt khám không chỉ mang lại sự tiện lợi mà còn giúp cải thiện đáng kể chất lượng cuộc sống cho người bệnh. Thay vì phải đi khám từ nửa đêm và chờ đợi mệt mỏi, người bệnh giờ đây có thể dễ dàng đặt khám nhanh - lấy số trước, tiết kiệm thời gian và chi phí. Với sự đồng hành của Medpro, người bệnh có thể yên tâm hơn trong hành trình chăm sóc sức khỏe, từ đó tập trung vào việc điều trị và phục hồi, không còn bị gánh nặng bởi những khó khăn trong việc khám chữa bệnh.",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                    content: {
-                        title: "Nguồn",
-                        type: "number",
-                        description: [
-                            "Thông tin về việc người bệnh đi khám từ nửa đêm, xếp hàng dài tại các bệnh viện - Báo Tuổi Trẻ Online: https://tuoitre.vn/di-kham-benh-luc-nua-dem-20240808100358225.htm",
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            //form data for parent element
-            id: 4,
-            title: "Đi khám bệnh từ nửa đêm, cuộc đua giữa thời gian và sức khỏe",
-            shortDescription:
-                "Báo Tuổi Trẻ đưa tin, để kịp lấy số thứ tự khám tại các bệnh viện tuyến đầu TPHCM, nhiều người dân phải đi khám từ nửa đêm, đến sớm và trải chiếu nằm chờ, với hy vọng lấy được số nhỏ, kịp chuyến xe về quê. Trong bối cảnh này, việc sử dụng các ứng dụng đặt khám giúp giải quyết tình trạng chờ đợi, đơn giản hóa quy trình đi khám cho người dân. Tìm hiểu tiện ích đặt khám nhanh - lấy số trước tại đây!",
-            type: "document",
-            description: [
-                "Mỗi đêm, hàng trăm ngàn người bệnh đổ về các bệnh viện lớn, trải chiếu nằm chờ từ nửa đêm đến giờ xếp hàng, lấy số thứ tự. Họ mang theo nỗi lo lắng về sức khỏe và hy vọng vào kết quả khám bệnh, nhưng phải đối mặt với những giờ phút chờ đợi mệt mỏi. Nhiều người bệnh và thân nhân, đặc biệt là những người ở các tỉnh xa như Cà Mau, Ninh Thuận phải thức dậy từ rất sớm, thậm chí là đi khám từ nửa đêm. Trước thực trạng này, ứng dụng đặt khám là một giải pháp thông minh. Trong số đó, Medpro nổi bật với giải pháp toàn diện, giúp người dân không cần phải đến bệnh viện từ sáng sớm, mang lại sự an tâm với hơn 200 cơ sở y tế trên toàn quốc.",
-            ],
-            image: "https://medpro.vn/_next/image?url=https%3A%2F%2Fcms.medpro.com.vn%2Fuploads%2F1723958664719_3d444fc91d.png&w=1920&q=100",
-            timestamp: "18/08/2024, 12:33",
-            author: "Mộc Thanh",
-            from: "Tin dịch vụ",
-            // end form data for parent element
-
-            ///form data for content element (get by id);
-            content: [
-                {
-                    title: "Khó khăn của người bệnh khi đi khám từ nửa đêm",
-                    type: "document",
-                    description: [
-                        "Theo bản tin phóng sự từ Báo Tuổi Trẻ, việc đi khám từ nửa đêm là viễn cảnh quen thuộc ở các bệnh viện công tuyến đầu TPHCM. Hàng đêm, khi nhiều người còn say giấc ngủ thì người bệnh và thân nhân đã thức dậy, di chuyển đến TPHCM để xếp hàng, chờ bốc số thứ tự khám bệnh. Khung cảnh quen thuộc này diễn ra hàng ngày tại các bệnh viện lớn như Chợ Rẫy, Bình Dân, Ung Bướu, BV Đại học Y Dược TPHCM,... Những người bệnh từ các tỉnh xa như Cà Mau hay Trà Vinh, phải vượt hàng trăm cây số, ngồi xe đò suốt nhiều giờ liền để có mặt tại bệnh viện khi trời còn chưa sáng.",
-                    ],
-                    content: [
-                        {
-                            title: "Hàng dài xếp hàng chờ lấy số trước bình minh",
-                            type: "document",
-                            description: [
-                                "Trước bình minh, người bệnh đã xếp hàng dài chờ khám tại các bệnh viện lớn ở TP.HCM, ngồi trên ghế lạnh hoặc trải chiếu nằm đợi. Gương mặt họ hiện rõ sự mệt mỏi, đặc biệt là những người từ tỉnh xa. Cái lạnh của đêm không làm họ nản lòng, chỉ mong được khám sớm để tránh phải chờ đợi cả ngày.",
-                                'Khi chỉ còn 30 phút nữa đến 0h giờ bốc số tại BV Chợ Rẫy, hàng người đã ngồi kín hơn nửa sảnh. Bà Thanh Tùng (54 tuổi, Ninh Thuận) chia sẻ: "Đi sớm vậy mà vẫn chưa phải người đến sớm nhất". Bà cũng nói thêm, chỉ cần một tiếng nữa, hàng người sẽ kéo dài hết hành lang.',
-                                "Phóng viên Báo Tuổi Trẻ ghi nhận, những người quen thuộc với việc khám bệnh đã có kinh nghiệm, nhưng những người lần đầu từ quê lên thì gặp nhiều khó khăn. Một số người bệnh đã đến BV Ung Bướu từ 23h nhưng phải đứng chờ ngoài cổng vì 2h30 mới mở. Tại BV Bình Dân, dù vừa hơn 0h, số thứ tự đã lên đến 18.",
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-xep-hang-luc-0gio-tai-bv-cho-ray.jpeg",
-                                description: "Người dân xếp hàng chơ bốc số lúc 0h tại BV Chợ Rẫy. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                        {
-                            title: "Thời gian và chi phí - Bài toán khó cho người bệnh",
-                            type: "document",
-                            description: [
-                                'Thời gian chờ đợi không chỉ là thử thách về thể chất mà còn gây áp lực tinh thần, đặc biệt với những người từ xa đến TP.HCM khám bệnh. Để tiết kiệm chi phí, nhiều người không thuê phòng nghỉ, mang theo đồ ăn tự chuẩn bị và nằm đợi ở sảnh. Mỗi chuyến khám bệnh là một cuộc "đánh cược" với sức khỏe và tài chính gia đình.',
-                                'Một người đàn ông từ xã Đông Hải, huyện Duyên Hải, chia sẻ rằng dù đã tính toán để đến đúng giờ BV Bình Dân phát số, anh vẫn chỉ lấy được số 19. Lần trước, anh chờ đến trưa mới được khám vì lấy số 28. Anh than thở: “Bệnh tật không mệt bằng việc đi đi về về mấy trăm cây số. Hy vọng lần này mổ xong luôn để khỏi phải tái khám".',
-                                'Bà Xuân, bị suy thận hai năm, đã quen với cảnh đi khám từ nữa đêm. Khi con bà cầm phiếu số 106, bà không giấu nổi sự buồn bã, biết rằng có thể phải chờ đến hôm sau. Sau khi lấy số, hai mẹ con tìm chỗ ngủ trong khu vực đã kín người, cố gắng tiết kiệm tối đa bằng cách mang theo đồ ăn và không thuê trọ. Bà nói: “Còn phải đi khám dài dài, cố mà tiết kiệm, đói thì ăn cơm cháy rồi uống nước, về nhà mới ăn uống thoải mái được".',
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-trai-chieu-nam-tai-bv.jpeg",
-                                description: "Người dân trải chiếu nằm chờ ở sảnh bệnh viện để tiết kiệm chi phí. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                    ],
-                },
-                {
-                    title: "Ứng dụng đặt khám - Giải pháp y tế số, kết nối người dân với các bệnh viện hàng đầu",
-                    type: "document",
-                    description: [
-                        "Trước những khó khăn và bất tiện trong quá trình khám chữa bệnh, đặt khám qua App (ứng dụng) đã xuất hiện như một giải pháp tối ưu, giúp người bệnh tiết kiệm thời gian và chi phí. Những ứng dụng này không chỉ cho phép đặt lịch khám mà còn giúp lấy số thứ tự trước, tránh tình trạng phải đi từ nửa đêm và chờ đợi lâu.",
-                        "Trong xu hướng chuyển đổi số, Medpro nổi bật là một trong những ứng dụng hàng đầu trong lĩnh vực y tế số, cho phép đặt lịch khám tại hơn 200 cơ sở y tế trên toàn quốc. Ứng dụng này mang đến nhiều tiện ích như nhắc nhở lịch hẹn, hỗ trợ thanh toán trực tuyến, và tư vấn sức khỏe qua video với bác sĩ chuyên khoa. Người dùng chỉ cần đặt lịch và đến thẳng phòng khám, giúp rút ngắn quy trình và tiết kiệm thời gian đáng kể",
-                        "Medpro không chỉ phổ biến trên Apple Store và Google Play mà còn được đông đảo người dùng tin tưởng. Hiện Medpro là đối tác chiến lược của nhiều bệnh viện lớn như Bệnh viện Đại học Y Dược TPHCM, Chợ Rẫy, Nhi đồng 1, Bệnh viện Mắt, Da liễu TPHCM,... Với phương châm vì sức khỏe cộng đồng, Medpro đang không ngừng nâng cao chất lượng dịch vụ y tế, giảm bớt gánh nặng cho người bệnh và trở thành người bạn đồng hành đáng tin cậy trong hành trình chăm sóc sức khỏe.",
-                        "Đặt khám trên 200 cơ sở y tế trên toàn quốc: https://medpro.vn/co-so-y-te",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                },
-                {
-                    title: "Kết luận",
-                    type: "document",
-                    description: [
-                        "Trong bối cảnh những khó khăn và bất tiện khi đi khám bệnh giữa đêm khuya vẫn còn hiện hữu, việc sử dụng các ứng dụng đặt khám không chỉ mang lại sự tiện lợi mà còn giúp cải thiện đáng kể chất lượng cuộc sống cho người bệnh. Thay vì phải đi khám từ nửa đêm và chờ đợi mệt mỏi, người bệnh giờ đây có thể dễ dàng đặt khám nhanh - lấy số trước, tiết kiệm thời gian và chi phí. Với sự đồng hành của Medpro, người bệnh có thể yên tâm hơn trong hành trình chăm sóc sức khỏe, từ đó tập trung vào việc điều trị và phục hồi, không còn bị gánh nặng bởi những khó khăn trong việc khám chữa bệnh.",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                    content: {
-                        title: "Nguồn",
-                        type: "number",
-                        description: [
-                            "Thông tin về việc người bệnh đi khám từ nửa đêm, xếp hàng dài tại các bệnh viện - Báo Tuổi Trẻ Online: https://tuoitre.vn/di-kham-benh-luc-nua-dem-20240808100358225.htm",
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            //form data for parent element
-            id: 5,
-            title: "Đi khám bệnh từ nửa đêm, cuộc đua giữa thời gian và sức khỏe",
-            shortDescription:
-                "Báo Tuổi Trẻ đưa tin, để kịp lấy số thứ tự khám tại các bệnh viện tuyến đầu TPHCM, nhiều người dân phải đi khám từ nửa đêm, đến sớm và trải chiếu nằm chờ, với hy vọng lấy được số nhỏ, kịp chuyến xe về quê. Trong bối cảnh này, việc sử dụng các ứng dụng đặt khám giúp giải quyết tình trạng chờ đợi, đơn giản hóa quy trình đi khám cho người dân. Tìm hiểu tiện ích đặt khám nhanh - lấy số trước tại đây!",
-            type: "document",
-            description: [
-                "Mỗi đêm, hàng trăm ngàn người bệnh đổ về các bệnh viện lớn, trải chiếu nằm chờ từ nửa đêm đến giờ xếp hàng, lấy số thứ tự. Họ mang theo nỗi lo lắng về sức khỏe và hy vọng vào kết quả khám bệnh, nhưng phải đối mặt với những giờ phút chờ đợi mệt mỏi. Nhiều người bệnh và thân nhân, đặc biệt là những người ở các tỉnh xa như Cà Mau, Ninh Thuận phải thức dậy từ rất sớm, thậm chí là đi khám từ nửa đêm. Trước thực trạng này, ứng dụng đặt khám là một giải pháp thông minh. Trong số đó, Medpro nổi bật với giải pháp toàn diện, giúp người dân không cần phải đến bệnh viện từ sáng sớm, mang lại sự an tâm với hơn 200 cơ sở y tế trên toàn quốc.",
-            ],
-            image: "https://medpro.vn/_next/image?url=https%3A%2F%2Fcms.medpro.com.vn%2Fuploads%2F1723958664719_3d444fc91d.png&w=1920&q=100",
-            timestamp: "18/08/2024, 12:33",
-            author: "Mộc Thanh",
-            from: "Tin dịch vụ",
-            // end form data for parent element
-
-            ///form data for content element (get by id);
-            content: [
-                {
-                    title: "Khó khăn của người bệnh khi đi khám từ nửa đêm",
-                    type: "document",
-                    description: [
-                        "Theo bản tin phóng sự từ Báo Tuổi Trẻ, việc đi khám từ nửa đêm là viễn cảnh quen thuộc ở các bệnh viện công tuyến đầu TPHCM. Hàng đêm, khi nhiều người còn say giấc ngủ thì người bệnh và thân nhân đã thức dậy, di chuyển đến TPHCM để xếp hàng, chờ bốc số thứ tự khám bệnh. Khung cảnh quen thuộc này diễn ra hàng ngày tại các bệnh viện lớn như Chợ Rẫy, Bình Dân, Ung Bướu, BV Đại học Y Dược TPHCM,... Những người bệnh từ các tỉnh xa như Cà Mau hay Trà Vinh, phải vượt hàng trăm cây số, ngồi xe đò suốt nhiều giờ liền để có mặt tại bệnh viện khi trời còn chưa sáng.",
-                    ],
-                    content: [
-                        {
-                            title: "Hàng dài xếp hàng chờ lấy số trước bình minh",
-                            type: "document",
-                            description: [
-                                "Trước bình minh, người bệnh đã xếp hàng dài chờ khám tại các bệnh viện lớn ở TP.HCM, ngồi trên ghế lạnh hoặc trải chiếu nằm đợi. Gương mặt họ hiện rõ sự mệt mỏi, đặc biệt là những người từ tỉnh xa. Cái lạnh của đêm không làm họ nản lòng, chỉ mong được khám sớm để tránh phải chờ đợi cả ngày.",
-                                'Khi chỉ còn 30 phút nữa đến 0h giờ bốc số tại BV Chợ Rẫy, hàng người đã ngồi kín hơn nửa sảnh. Bà Thanh Tùng (54 tuổi, Ninh Thuận) chia sẻ: "Đi sớm vậy mà vẫn chưa phải người đến sớm nhất". Bà cũng nói thêm, chỉ cần một tiếng nữa, hàng người sẽ kéo dài hết hành lang.',
-                                "Phóng viên Báo Tuổi Trẻ ghi nhận, những người quen thuộc với việc khám bệnh đã có kinh nghiệm, nhưng những người lần đầu từ quê lên thì gặp nhiều khó khăn. Một số người bệnh đã đến BV Ung Bướu từ 23h nhưng phải đứng chờ ngoài cổng vì 2h30 mới mở. Tại BV Bình Dân, dù vừa hơn 0h, số thứ tự đã lên đến 18.",
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-xep-hang-luc-0gio-tai-bv-cho-ray.jpeg",
-                                description: "Người dân xếp hàng chơ bốc số lúc 0h tại BV Chợ Rẫy. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                        {
-                            title: "Thời gian và chi phí - Bài toán khó cho người bệnh",
-                            type: "document",
-                            description: [
-                                'Thời gian chờ đợi không chỉ là thử thách về thể chất mà còn gây áp lực tinh thần, đặc biệt với những người từ xa đến TP.HCM khám bệnh. Để tiết kiệm chi phí, nhiều người không thuê phòng nghỉ, mang theo đồ ăn tự chuẩn bị và nằm đợi ở sảnh. Mỗi chuyến khám bệnh là một cuộc "đánh cược" với sức khỏe và tài chính gia đình.',
-                                'Một người đàn ông từ xã Đông Hải, huyện Duyên Hải, chia sẻ rằng dù đã tính toán để đến đúng giờ BV Bình Dân phát số, anh vẫn chỉ lấy được số 19. Lần trước, anh chờ đến trưa mới được khám vì lấy số 28. Anh than thở: “Bệnh tật không mệt bằng việc đi đi về về mấy trăm cây số. Hy vọng lần này mổ xong luôn để khỏi phải tái khám".',
-                                'Bà Xuân, bị suy thận hai năm, đã quen với cảnh đi khám từ nữa đêm. Khi con bà cầm phiếu số 106, bà không giấu nổi sự buồn bã, biết rằng có thể phải chờ đến hôm sau. Sau khi lấy số, hai mẹ con tìm chỗ ngủ trong khu vực đã kín người, cố gắng tiết kiệm tối đa bằng cách mang theo đồ ăn và không thuê trọ. Bà nói: “Còn phải đi khám dài dài, cố mà tiết kiệm, đói thì ăn cơm cháy rồi uống nước, về nhà mới ăn uống thoải mái được".',
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-trai-chieu-nam-tai-bv.jpeg",
-                                description: "Người dân trải chiếu nằm chờ ở sảnh bệnh viện để tiết kiệm chi phí. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                    ],
-                },
-                {
-                    title: "Ứng dụng đặt khám - Giải pháp y tế số, kết nối người dân với các bệnh viện hàng đầu",
-                    type: "document",
-                    description: [
-                        "Trước những khó khăn và bất tiện trong quá trình khám chữa bệnh, đặt khám qua App (ứng dụng) đã xuất hiện như một giải pháp tối ưu, giúp người bệnh tiết kiệm thời gian và chi phí. Những ứng dụng này không chỉ cho phép đặt lịch khám mà còn giúp lấy số thứ tự trước, tránh tình trạng phải đi từ nửa đêm và chờ đợi lâu.",
-                        "Trong xu hướng chuyển đổi số, Medpro nổi bật là một trong những ứng dụng hàng đầu trong lĩnh vực y tế số, cho phép đặt lịch khám tại hơn 200 cơ sở y tế trên toàn quốc. Ứng dụng này mang đến nhiều tiện ích như nhắc nhở lịch hẹn, hỗ trợ thanh toán trực tuyến, và tư vấn sức khỏe qua video với bác sĩ chuyên khoa. Người dùng chỉ cần đặt lịch và đến thẳng phòng khám, giúp rút ngắn quy trình và tiết kiệm thời gian đáng kể",
-                        "Medpro không chỉ phổ biến trên Apple Store và Google Play mà còn được đông đảo người dùng tin tưởng. Hiện Medpro là đối tác chiến lược của nhiều bệnh viện lớn như Bệnh viện Đại học Y Dược TPHCM, Chợ Rẫy, Nhi đồng 1, Bệnh viện Mắt, Da liễu TPHCM,... Với phương châm vì sức khỏe cộng đồng, Medpro đang không ngừng nâng cao chất lượng dịch vụ y tế, giảm bớt gánh nặng cho người bệnh và trở thành người bạn đồng hành đáng tin cậy trong hành trình chăm sóc sức khỏe.",
-                        "Đặt khám trên 200 cơ sở y tế trên toàn quốc: https://medpro.vn/co-so-y-te",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                },
-                {
-                    title: "Kết luận",
-                    type: "document",
-                    description: [
-                        "Trong bối cảnh những khó khăn và bất tiện khi đi khám bệnh giữa đêm khuya vẫn còn hiện hữu, việc sử dụng các ứng dụng đặt khám không chỉ mang lại sự tiện lợi mà còn giúp cải thiện đáng kể chất lượng cuộc sống cho người bệnh. Thay vì phải đi khám từ nửa đêm và chờ đợi mệt mỏi, người bệnh giờ đây có thể dễ dàng đặt khám nhanh - lấy số trước, tiết kiệm thời gian và chi phí. Với sự đồng hành của Medpro, người bệnh có thể yên tâm hơn trong hành trình chăm sóc sức khỏe, từ đó tập trung vào việc điều trị và phục hồi, không còn bị gánh nặng bởi những khó khăn trong việc khám chữa bệnh.",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                    content: {
-                        title: "Nguồn",
-                        type: "number",
-                        description: [
-                            "Thông tin về việc người bệnh đi khám từ nửa đêm, xếp hàng dài tại các bệnh viện - Báo Tuổi Trẻ Online: https://tuoitre.vn/di-kham-benh-luc-nua-dem-20240808100358225.htm",
-                        ],
-                    },
-                },
-            ],
-        },
-        {
-            //form data for parent element
-            id: 6,
-            title: "Đi khám bệnh từ nửa đêm, cuộc đua giữa thời gian và sức khỏe",
-            shortDescription:
-                "Báo Tuổi Trẻ đưa tin, để kịp lấy số thứ tự khám tại các bệnh viện tuyến đầu TPHCM, nhiều người dân phải đi khám từ nửa đêm, đến sớm và trải chiếu nằm chờ, với hy vọng lấy được số nhỏ, kịp chuyến xe về quê. Trong bối cảnh này, việc sử dụng các ứng dụng đặt khám giúp giải quyết tình trạng chờ đợi, đơn giản hóa quy trình đi khám cho người dân. Tìm hiểu tiện ích đặt khám nhanh - lấy số trước tại đây!",
-            type: "document",
-            description: [
-                "Mỗi đêm, hàng trăm ngàn người bệnh đổ về các bệnh viện lớn, trải chiếu nằm chờ từ nửa đêm đến giờ xếp hàng, lấy số thứ tự. Họ mang theo nỗi lo lắng về sức khỏe và hy vọng vào kết quả khám bệnh, nhưng phải đối mặt với những giờ phút chờ đợi mệt mỏi. Nhiều người bệnh và thân nhân, đặc biệt là những người ở các tỉnh xa như Cà Mau, Ninh Thuận phải thức dậy từ rất sớm, thậm chí là đi khám từ nửa đêm. Trước thực trạng này, ứng dụng đặt khám là một giải pháp thông minh. Trong số đó, Medpro nổi bật với giải pháp toàn diện, giúp người dân không cần phải đến bệnh viện từ sáng sớm, mang lại sự an tâm với hơn 200 cơ sở y tế trên toàn quốc.",
-            ],
-            image: "https://medpro.vn/_next/image?url=https%3A%2F%2Fcms.medpro.com.vn%2Fuploads%2F1723958664719_3d444fc91d.png&w=1920&q=100",
-            timestamp: "18/08/2024, 12:33",
-            author: "Mộc Thanh",
-            from: "Tin dịch vụ",
-            // end form data for parent element
-
-            ///form data for content element (get by id);
-            content: [
-                {
-                    title: "Khó khăn của người bệnh khi đi khám từ nửa đêm",
-                    type: "document",
-                    description: [
-                        "Theo bản tin phóng sự từ Báo Tuổi Trẻ, việc đi khám từ nửa đêm là viễn cảnh quen thuộc ở các bệnh viện công tuyến đầu TPHCM. Hàng đêm, khi nhiều người còn say giấc ngủ thì người bệnh và thân nhân đã thức dậy, di chuyển đến TPHCM để xếp hàng, chờ bốc số thứ tự khám bệnh. Khung cảnh quen thuộc này diễn ra hàng ngày tại các bệnh viện lớn như Chợ Rẫy, Bình Dân, Ung Bướu, BV Đại học Y Dược TPHCM,... Những người bệnh từ các tỉnh xa như Cà Mau hay Trà Vinh, phải vượt hàng trăm cây số, ngồi xe đò suốt nhiều giờ liền để có mặt tại bệnh viện khi trời còn chưa sáng.",
-                    ],
-                    content: [
-                        {
-                            title: "Hàng dài xếp hàng chờ lấy số trước bình minh",
-                            type: "document",
-                            description: [
-                                "Trước bình minh, người bệnh đã xếp hàng dài chờ khám tại các bệnh viện lớn ở TP.HCM, ngồi trên ghế lạnh hoặc trải chiếu nằm đợi. Gương mặt họ hiện rõ sự mệt mỏi, đặc biệt là những người từ tỉnh xa. Cái lạnh của đêm không làm họ nản lòng, chỉ mong được khám sớm để tránh phải chờ đợi cả ngày.",
-                                'Khi chỉ còn 30 phút nữa đến 0h giờ bốc số tại BV Chợ Rẫy, hàng người đã ngồi kín hơn nửa sảnh. Bà Thanh Tùng (54 tuổi, Ninh Thuận) chia sẻ: "Đi sớm vậy mà vẫn chưa phải người đến sớm nhất". Bà cũng nói thêm, chỉ cần một tiếng nữa, hàng người sẽ kéo dài hết hành lang.',
-                                "Phóng viên Báo Tuổi Trẻ ghi nhận, những người quen thuộc với việc khám bệnh đã có kinh nghiệm, nhưng những người lần đầu từ quê lên thì gặp nhiều khó khăn. Một số người bệnh đã đến BV Ung Bướu từ 23h nhưng phải đứng chờ ngoài cổng vì 2h30 mới mở. Tại BV Bình Dân, dù vừa hơn 0h, số thứ tự đã lên đến 18.",
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-xep-hang-luc-0gio-tai-bv-cho-ray.jpeg",
-                                description: "Người dân xếp hàng chơ bốc số lúc 0h tại BV Chợ Rẫy. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                        {
-                            title: "Thời gian và chi phí - Bài toán khó cho người bệnh",
-                            type: "document",
-                            description: [
-                                'Thời gian chờ đợi không chỉ là thử thách về thể chất mà còn gây áp lực tinh thần, đặc biệt với những người từ xa đến TP.HCM khám bệnh. Để tiết kiệm chi phí, nhiều người không thuê phòng nghỉ, mang theo đồ ăn tự chuẩn bị và nằm đợi ở sảnh. Mỗi chuyến khám bệnh là một cuộc "đánh cược" với sức khỏe và tài chính gia đình.',
-                                'Một người đàn ông từ xã Đông Hải, huyện Duyên Hải, chia sẻ rằng dù đã tính toán để đến đúng giờ BV Bình Dân phát số, anh vẫn chỉ lấy được số 19. Lần trước, anh chờ đến trưa mới được khám vì lấy số 28. Anh than thở: “Bệnh tật không mệt bằng việc đi đi về về mấy trăm cây số. Hy vọng lần này mổ xong luôn để khỏi phải tái khám".',
-                                'Bà Xuân, bị suy thận hai năm, đã quen với cảnh đi khám từ nữa đêm. Khi con bà cầm phiếu số 106, bà không giấu nổi sự buồn bã, biết rằng có thể phải chờ đến hôm sau. Sau khi lấy số, hai mẹ con tìm chỗ ngủ trong khu vực đã kín người, cố gắng tiết kiệm tối đa bằng cách mang theo đồ ăn và không thuê trọ. Bà nói: “Còn phải đi khám dài dài, cố mà tiết kiệm, đói thì ăn cơm cháy rồi uống nước, về nhà mới ăn uống thoải mái được".',
-                            ],
-                            image: {
-                                link: "https://cdn.medpro.vn/medpro-production/medpro/topics/nguoi-dan-trai-chieu-nam-tai-bv.jpeg",
-                                description: "Người dân trải chiếu nằm chờ ở sảnh bệnh viện để tiết kiệm chi phí. Nguồn: Báo Tuổi Trẻ",
-                            },
-                        },
-                    ],
-                },
-                {
-                    title: "Ứng dụng đặt khám - Giải pháp y tế số, kết nối người dân với các bệnh viện hàng đầu",
-                    type: "document",
-                    description: [
-                        "Trước những khó khăn và bất tiện trong quá trình khám chữa bệnh, đặt khám qua App (ứng dụng) đã xuất hiện như một giải pháp tối ưu, giúp người bệnh tiết kiệm thời gian và chi phí. Những ứng dụng này không chỉ cho phép đặt lịch khám mà còn giúp lấy số thứ tự trước, tránh tình trạng phải đi từ nửa đêm và chờ đợi lâu.",
-                        "Trong xu hướng chuyển đổi số, Medpro nổi bật là một trong những ứng dụng hàng đầu trong lĩnh vực y tế số, cho phép đặt lịch khám tại hơn 200 cơ sở y tế trên toàn quốc. Ứng dụng này mang đến nhiều tiện ích như nhắc nhở lịch hẹn, hỗ trợ thanh toán trực tuyến, và tư vấn sức khỏe qua video với bác sĩ chuyên khoa. Người dùng chỉ cần đặt lịch và đến thẳng phòng khám, giúp rút ngắn quy trình và tiết kiệm thời gian đáng kể",
-                        "Medpro không chỉ phổ biến trên Apple Store và Google Play mà còn được đông đảo người dùng tin tưởng. Hiện Medpro là đối tác chiến lược của nhiều bệnh viện lớn như Bệnh viện Đại học Y Dược TPHCM, Chợ Rẫy, Nhi đồng 1, Bệnh viện Mắt, Da liễu TPHCM,... Với phương châm vì sức khỏe cộng đồng, Medpro đang không ngừng nâng cao chất lượng dịch vụ y tế, giảm bớt gánh nặng cho người bệnh và trở thành người bạn đồng hành đáng tin cậy trong hành trình chăm sóc sức khỏe.",
-                        "Đặt khám trên 200 cơ sở y tế trên toàn quốc: https://medpro.vn/co-so-y-te",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                },
-                {
-                    title: "Kết luận",
-                    type: "document",
-                    description: [
-                        "Trong bối cảnh những khó khăn và bất tiện khi đi khám bệnh giữa đêm khuya vẫn còn hiện hữu, việc sử dụng các ứng dụng đặt khám không chỉ mang lại sự tiện lợi mà còn giúp cải thiện đáng kể chất lượng cuộc sống cho người bệnh. Thay vì phải đi khám từ nửa đêm và chờ đợi mệt mỏi, người bệnh giờ đây có thể dễ dàng đặt khám nhanh - lấy số trước, tiết kiệm thời gian và chi phí. Với sự đồng hành của Medpro, người bệnh có thể yên tâm hơn trong hành trình chăm sóc sức khỏe, từ đó tập trung vào việc điều trị và phục hồi, không còn bị gánh nặng bởi những khó khăn trong việc khám chữa bệnh.",
-                    ],
-                    image: "https://cdn.medpro.vn/medpro-production/medpro/topics/mang-luoi-ket-noi-200-csyt-medpro.jpeg",
-                    content: {
-                        title: "Nguồn",
-                        type: "number",
-                        description: [
-                            "Thông tin về việc người bệnh đi khám từ nửa đêm, xếp hàng dài tại các bệnh viện - Báo Tuổi Trẻ Online: https://tuoitre.vn/di-kham-benh-luc-nua-dem-20240808100358225.htm",
-                        ],
-                    },
-                },
-            ],
-        },
-    ];
-
-    const listNewsService = listNews.filter((news) => news.from === "Tin dịch vụ");
-    const firstNews = listNews.shift();
     const url = {
         "Tin dịch vụ": "tin-tuc",
         "Tin Y tế": "tin-tuc/tin-y-te",
         "Y học thường thức": "tin-tuc/y-hoc-thuong-thuc",
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getData("/get-top-news");
+                if (!response.isSuccess) {
+                    throw new Error(response.message);
+                }
+                //set the first news
+                setFirstNews(response.results[0]);
+                //set from the second news
+                setTopNews(response.results.slice(1));
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getData(`/get-news?page=${page}&limit=${LIMIT}`);
+                if (!response.isSuccess) {
+                    throw new Error(response.message);
+                }
+                setToltalPage(response.totalPage);
+                setNews(response.results);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        fetchData();
+    }, [page]);
+
+    console.log(news);
+
     return (
         <div className="flex flex-col gap-8 mb-16">
             <div className="flex gap-4 mb-8">
                 <ListTopNewsCard url={url} firstNews={firstNews} />
                 <div className="w-2/5">
                     <div className="flex flex-col gap-4">
-                        {listNews.map((news, index) => (
+                        {topNews.map((news, index) => (
                             <>
-                                <TopNewsCard key={index} index={index} news={news} url={url} />
+                                <TopNewsCard key={index} index={index} news={news} />
                             </>
                         ))}
                     </div>
                 </div>
             </div>
             <div className="grid grid-cols-3 gap-8">
-                {listNewsService.map((news, index) => (
+                {news.map((news, index) => (
                     <OtherNewsCard key={index} news={news} url={url} />
                 ))}
             </div>
+
+            <Paginate total={totalPage} currentPage={page} setPage={setPage} />
         </div>
     );
 };

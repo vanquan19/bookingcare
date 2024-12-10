@@ -20,3 +20,34 @@
     box-sizing: border-box;
     color: #0e3242;
 }
+
+.set_innerHTML h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.set_innerHTML p {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.set_innerHTML ul {
+    list-style: disc;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0 2rem;
+}
+.set_innerHTML ol {
+    list-style: decimal;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0 1.5rem;
+}
+
+.set_innerHTML li {
+    font-size: 1rem;
+    padding: 0 3px;
+}

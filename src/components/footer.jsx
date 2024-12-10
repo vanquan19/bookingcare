@@ -26,32 +26,7 @@ const Footer = () => {
                         </li>
                     </ul>
                 </div>
-                <div>
-                    <Heading3>Dịch vụ y tế</Heading3>
-                    <ul className="text-black ">
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Đặt khám tại cơ sở</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Đặt khám theo bác sĩ</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Tư vấn khám bệnh qua video</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Đặt lịch xét nghiệm</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Gói khám sức khỏe</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Y tế tại nhà</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Thanh toán viện phí</Link>
-                        </li>
-                    </ul>
-                </div>
+
                 <div>
                     <Heading3>Cơ sở y tế</Heading3>
                     <ul className="text-black ">
@@ -82,22 +57,11 @@ const Footer = () => {
                     <Heading3>Hướng dẫn</Heading3>
                     <ul className="text-black ">
                         <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Cài đặt ứng dụng</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
                             <Link>Đặt lịch khám</Link>
                         </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Tư vấn khám bệnh qua video</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Quy trình hoàn phí</Link>
-                        </li>
+
                         <li className="py-1 text-gray-500 hover:text-primary">
                             <Link>Câu hỏi thường gặp</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Quy trình đi khám</Link>
                         </li>
                     </ul>
                 </div>
@@ -105,47 +69,7 @@ const Footer = () => {
                     <Heading3>Liên hệ hợp tác</Heading3>
                     <ul className="text-black ">
                         <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Tham gia Booking</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Khám sức khỏe doanh nghiệp</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Quảng cáo</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Tuyển dụng</Link>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <Heading3>Tin tức</Heading3>
-                    <ul className="text-black ">
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Tin dịch vụ</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Tin Y Tế</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Y Học thường thức</Link>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <Heading3>Về Booking</Heading3>
-                    <ul className="text-black ">
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Giới thiệu</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Điều khoản dịch vụ</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Chính sách bảo mật</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Quy định sử dụng</Link>
+                            <Link href="/lien-he-hop-tac">Tham gia Booking</Link>
                         </li>
                     </ul>
                 </div>

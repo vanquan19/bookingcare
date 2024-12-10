@@ -144,7 +144,7 @@ const DoctorManagePackage = () => {
                                 </th>
                                 <th className="text-left px-2 py-3 border border-gray-300 whitespace-nowrap">Tên Gói khám</th>
                                 <th className="text-left px-2 py-3 border border-gray-300 whitespace-nowrap">Giá khám</th>
-                                <th className="text-left px-2 py-3 border border-gray-300 whitespace-nowrap">Giảm giá</th>
+                                <th className="text-left px-2 py-3 border border-gray-300 whitespace-nowrap">Bác sĩ phụ trách</th>
                                 <th className="text-left px-2 py-3 border border-gray-300 whitespace-nowrap">Trạng thái</th>
                             </tr>
                         </thead>
@@ -169,7 +169,7 @@ const DoctorManagePackage = () => {
                                         </span>
                                     </td>
                                     <td className="text-left px-2 py-2 border border-gray-300">
-                                        <span className="line-clamp-2">{medicalPackage.discount}%</span>
+                                        <span className="line-clamp-2">{medicalPackage.firstname + " " + medicalPackage.lastname}</span>
                                     </td>
 
                                     <td className="text-left px-2 py-2 border border-gray-300 relative">
@@ -232,6 +232,8 @@ const DoctorManagePackage = () => {
                         isOpenEditPackage={isOpenEditPackage}
                         setIsOpenEditmedicalPackage={setIsOpenEditPackage}
                         medicalPackage={medicalPackageTarget}
+                        load={load}
+                        setLoad={setLoad}
                     />
                 )
             }
@@ -253,23 +255,43 @@ const DoctorManagePackage = () => {
 };
 
 const ModalAddNewMedicalPackage = ({ isOpenAddNewPackage, setIsOpenAddNewPackage, load, setLoad }) => {
+    const [doctor, setDoctor] = useState([]);
     const [medicalPackageName, setMedicalPackageName] = useState("");
     const [medicalPackagePrice, setMedicalPackagePrice] = useState("");
-    const [medicalPackageDiscount, setMedicalPackageDiscount] = useState(0);
+    const [medicalPackageDoctor, setMedicalPackageDoctor] = useState("");
     const [description, setDescription] = useState("");
     const [errors, setErrors] = useState({
         medicalPackageName: "",
     });
     const selector = useSelector((state) => state.auth);
+    //get doctor
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await getData(`/doctor/read?clinicId=${selector.data.clinicId}`, selector.accessToken);
+            if (!response.isSuccess) {
+                console.log(response.message);
+                return;
+            }
+            console.log(response);
+            setDoctor(response.data);
+        };
+        fetchData();
+    }, []);
+
+    //handle submit
     const handleSubmit = async () => {
         let validationErrors = {};
 
         if (!Validate.validateName(medicalPackageName)) {
             validationErrors.medicalPackageName = "Tên chuyên khoa không được để trống";
         }
+        if (!Validate.validateName(medicalPackageDoctor)) {
+            validationErrors.doctor = "Bác sĩ không được để trống";
+        }
 
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
+
             return;
         }
         setErrors({});
@@ -278,7 +300,7 @@ const ModalAddNewMedicalPackage = ({ isOpenAddNewPackage, setIsOpenAddNewPackage
             name: medicalPackageName,
             price: +medicalPackagePrice.replace(/\./g, "") || 0,
             description: description,
-            discount: +medicalPackageDiscount || 0,
+            doctorId: medicalPackageDoctor,
         };
         console.log(data);
 
@@ -322,19 +344,26 @@ const ModalAddNewMedicalPackage = ({ isOpenAddNewPackage, setIsOpenAddNewPackage
                                 />
                             </div>
                         </div>
-                        <div className="flex flex-col gap-2 relative">
+                        <div className="flex flex-col gap-2 relative w-full">
                             <label htmlFor="medicalPackage-discount" className="text-sm text-gray-600">
-                                Giảm giá (%)
+                                Bác sĩ phụ trách
                             </label>
-                            <input
+                            <select
                                 id="medicalPackage-discount"
                                 type="number"
                                 min="0"
                                 max="100"
                                 step="1"
                                 className="border border-gray-300 rounded px-2 py-2 outline-none"
-                                onChange={(e) => setMedicalPackageDiscount(e.target.value)}
-                            />
+                                onChange={(e) => setMedicalPackageDoctor(e.target.value)}>
+                                <option value="">--Chọn bác sĩ--</option>
+                                {doctor?.map((item, index) => (
+                                    <option key={index} value={item.id}>
+                                        {item.firstname + " " + item.lastname}
+                                    </option>
+                                ))}
+                            </select>
+                            <span className="text-red-300 text-sm absolute top-full">{errors.doctor}</span>
                         </div>
                     </div>
                     <div className="flex flex-col gap-2 relative mb-2">
@@ -372,16 +401,31 @@ const ModalAddNewMedicalPackage = ({ isOpenAddNewPackage, setIsOpenAddNewPackage
     );
 };
 
-const ModalEditMedicalPackage = ({ isOpenEditmedicalPackage, setIsOpenEditmedicalPackage, medicalPackage, setRowData, rowData }) => {
+const ModalEditMedicalPackage = ({ isOpenEditmedicalPackage, setIsOpenEditmedicalPackage, medicalPackage, load, setLoad }) => {
     const [medicalPackageName, setMedicalPackageName] = useState(medicalPackage.name);
     const [medicalPackagePrice, setMedicalPackagePrice] = useState(medicalPackage.price);
-    const [medicalPackageDiscount, setMedicalPackageDiscount] = useState(medicalPackage.discount);
+    const [medicalPackageDoctor, setMedicalPackageDoctor] = useState(medicalPackage.doctorId);
+    const [doctor, setDoctor] = useState([]);
     const [description, setDescription] = useState(medicalPackage.description);
     const [errors, setErrors] = useState({
         medicalPackageName: "",
     });
     const selector = useSelector((state) => state.auth);
 
+    //get doctor
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await getData(`/doctor/read?clinicId=${selector.data.clinicId}`, selector.accessToken);
+            if (!response.isSuccess) {
+                console.log(response.message);
+                return;
+            }
+            setDoctor(response.data);
+        };
+        fetchData();
+    }, []);
+
+    //handle submit
     const handleSubmit = async () => {
         let validationErrors = {};
 
@@ -389,8 +433,13 @@ const ModalEditMedicalPackage = ({ isOpenEditmedicalPackage, setIsOpenEditmedica
             validationErrors.medicalPackageName = "Tên phòng khám không được để trống";
         }
 
+        if (!Validate.validateName(medicalPackageDoctor)) {
+            validationErrors.doctor = "Bác sĩ không được để trống";
+        }
+
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
+
             return;
         }
 
@@ -398,7 +447,7 @@ const ModalEditMedicalPackage = ({ isOpenEditmedicalPackage, setIsOpenEditmedica
             medicalPackageName === medicalPackage.name &&
             medicalPackagePrice === medicalPackage.price &&
             description === medicalPackage.description &&
-            medicalPackageDiscount === medicalPackage.discount
+            medicalPackageDoctor === medicalPackage.doctorId
         ) {
             toast.info("Không có gì thay đổi!");
             setIsOpenEditmedicalPackage(false);
@@ -408,9 +457,9 @@ const ModalEditMedicalPackage = ({ isOpenEditmedicalPackage, setIsOpenEditmedica
         const data = {
             id: medicalPackage.id,
             name: medicalPackageName,
-            price: +medicalPackagePrice.replace(/\./g, "") || 0,
+            price: +medicalPackagePrice.toString().replace(/\./g, "") || 0,
             description: description,
-            discount: medicalPackageDiscount,
+            doctorId: medicalPackageDoctor,
         };
 
         //fetch data
@@ -421,13 +470,7 @@ const ModalEditMedicalPackage = ({ isOpenEditmedicalPackage, setIsOpenEditmedica
         }
         toast.success("Thông tin đã được cập nhật!");
         setIsOpenEditmedicalPackage(false);
-        const newData = rowData.map((item) => {
-            if (item.id === medicalPackage.id) {
-                return { ...data };
-            }
-            return item;
-        });
-        setRowData(newData);
+        setLoad(!load);
     };
 
     return (
@@ -469,20 +512,27 @@ const ModalEditMedicalPackage = ({ isOpenEditmedicalPackage, setIsOpenEditmedica
                                 />
                             </div>
                         </div>
-                        <div className="flex flex-col gap-2 relative">
+                        <div className="flex flex-col gap-2 relative w-full">
                             <label htmlFor="medicalPackage-discount" className="text-sm text-gray-600">
-                                Giảm giá (%)
+                                Bác sĩ phụ trách
                             </label>
-                            <input
-                                value={medicalPackageDiscount}
+                            <select
+                                value={medicalPackageDoctor}
                                 id="medicalPackage-discount"
                                 type="number"
                                 min="0"
                                 max="100"
                                 step="1"
                                 className="border border-gray-300 rounded px-2 py-2 outline-none"
-                                onChange={(e) => setMedicalPackageDiscount(e.target.value)}
-                            />
+                                onChange={(e) => setMedicalPackageDoctor(e.target.value)}>
+                                <option value="">--Chọn bác sĩ--</option>
+                                {doctor?.map((item, index) => (
+                                    <option key={index} value={item.id}>
+                                        {item.firstname + " " + item.lastname}
+                                    </option>
+                                ))}
+                            </select>
+                            <span className="text-red-300 text-sm absolute top-full">{errors.doctor}</span>
                         </div>
                     </div>
                     <div className="flex flex-col gap-2 relative mb-2">

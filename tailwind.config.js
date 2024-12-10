@@ -90,6 +90,7 @@ export default {
                 fadeOut: "fadeOut 0.5s ease-in-out",
                 "slide-from-right": "slide-from-right 0.5s ease-in-out",
                 "slide-from-top": "slide-from-top 0.5s ease-in-out",
+                "scroll-down": "scroll-down 0.4s ease-in-out",
             },
             keyframes: {
                 fadeIn: {
@@ -111,6 +112,10 @@ export default {
                 "slide-from-top": {
                     "0%": { top: "-50%" },
                     "100%": { top: "0" },
+                },
+                "scroll-down": {
+                    "0%": { height: 0 },
+                    "100%": { height: "100%" },
                 },
             },
             backgroundImage: {
@@ -155,6 +160,48 @@ export default {
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         WebkitLineClamp: 4,
+                        WebkitBoxOrient: "vertical",
+                    },
+                    5: {
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        WebkitLineClamp: 5,
+                        WebkitBoxOrient: "vertical",
+                    },
+                    6: {
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        WebkitLineClamp: 6,
+                        WebkitBoxOrient: "vertical",
+                    },
+                    7: {
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        WebkitLineClamp: 7,
+                        WebkitBoxOrient: "vertical",
+                    },
+                    8: {
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        WebkitLineClamp: 8,
+                        WebkitBoxOrient: "vertical",
+                    },
+                    9: {
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        WebkitLineClamp: 9,
+                        WebkitBoxOrient: "vertical",
+                    },
+                    10: {
+                        display: "-webkit-box",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        WebkitLineClamp: 10,
                         WebkitBoxOrient: "vertical",
                     },
                 },

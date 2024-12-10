@@ -144,8 +144,7 @@ const DoctorManageSpecialty = () => {
                                     <input type="checkbox" />
                                 </th>
                                 <th className="text-left px-2 py-3 border border-gray-300 whitespace-nowrap">Tên chuyên khoa</th>
-                                <th className="text-left px-2 py-3 border border-gray-300 whitespace-nowrap">Giá khám</th>
-                                <th className="text-left px-2 py-3 border border-gray-300 whitespace-nowrap">Giảm giá</th>
+
                                 <th className="text-left px-2 py-3 border border-gray-300 whitespace-nowrap">Trạng thái</th>
                             </tr>
                         </thead>
@@ -159,18 +158,6 @@ const DoctorManageSpecialty = () => {
                                         <div className="flex gap-3 items-center">
                                             <span className="line-clamp-2">{specialty.name}</span>
                                         </div>
-                                    </td>
-                                    <td className="text-left px-2 py-2 border border-gray-300">
-                                        <span className="line-clamp-2">
-                                            {specialty.price
-                                                .toString()
-                                                .replace(/\D/g, "")
-                                                .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-                                            đ
-                                        </span>
-                                    </td>
-                                    <td className="text-left px-2 py-2 border border-gray-300">
-                                        <span className="line-clamp-2">{specialty.discount}%</span>
                                     </td>
 
                                     <td className="text-left px-2 py-2 border border-gray-300 relative">
@@ -255,8 +242,6 @@ const DoctorManageSpecialty = () => {
 
 const ModalAddNewSpecialty = ({ isOpenAddNewSpecialty, setIsOpenAddNewSpecialty, load, setLoad }) => {
     const [specialtyName, setSpecialtyName] = useState("");
-    const [specialtyPrice, setSpecialtyPrice] = useState("");
-    const [specialtyDiscount, setSpecialtyDiscount] = useState(0);
     const [description, setDescription] = useState("");
     const [errors, setErrors] = useState({
         specialtyName: "",
@@ -277,9 +262,7 @@ const ModalAddNewSpecialty = ({ isOpenAddNewSpecialty, setIsOpenAddNewSpecialty,
         const data = {
             clinicId: selector.data.clinicId,
             name: specialtyName,
-            price: +specialtyPrice.replace(/\./g, "") || 0,
             description: description,
-            discount: +specialtyDiscount || 0,
         };
 
         //fetch data
@@ -309,42 +292,7 @@ const ModalAddNewSpecialty = ({ isOpenAddNewSpecialty, setIsOpenAddNewSpecialty,
                         <input type="text" id="specialty-name" className="border border-gray-300 rounded px-2 py-2 outline-none" onChange={(e) => setSpecialtyName(e.target.value)} />
                         <span className="text-red-300 text-sm absolute top-full">{errors.specialtyName}</span>
                     </div>
-                    <div className="flex gap-6 items-center">
-                        <div className="w-full">
-                            <div className="flex flex-col gap-2 relative ">
-                                <label htmlFor="price_specialty" className="text-sm text-gray-600">
-                                    Giá khám (VND)
-                                </label>
-                                <input
-                                    value={
-                                        specialtyPrice
-                                            .toString()
-                                            .replace(/\D/g, "")
-                                            .replace(/\B(?=(\d{3})+(?!\d))/g, ".") || ""
-                                    }
-                                    type="text"
-                                    id="price_specialty"
-                                    className="border border-gray-300 rounded px-2 py-2 outline-none"
-                                    onChange={(e) => setSpecialtyPrice(e.target.value)}
-                                />
-                                <span className="text-red-300 text-sm absolute top-full">{errors.specialtyPrice}</span>
-                            </div>
-                        </div>
-                        <div className="flex flex-col gap-2 relative">
-                            <label htmlFor="medicalPackage-discount" className="text-sm text-gray-600">
-                                Giảm giá (%)
-                            </label>
-                            <input
-                                id="medicalPackage-discount"
-                                type="number"
-                                min="0"
-                                max="100"
-                                step="1"
-                                className="border border-gray-300 rounded px-2 py-2 outline-none"
-                                onChange={(e) => setSpecialtyDiscount(e.target.value)}
-                            />
-                        </div>
-                    </div>
+
                     <div className="flex flex-col gap-2 relative mb-2">
                         <label htmlFor="specialty-description" className="text-sm text-gray-600">
                             Mô tả
@@ -382,8 +330,7 @@ const ModalAddNewSpecialty = ({ isOpenAddNewSpecialty, setIsOpenAddNewSpecialty,
 
 const ModalEditSpecialty = ({ isOpenEditSpecialty, setIsOpenEditSpecialty, specialty, setRowData, rowData }) => {
     const [specialtyName, setSpecialtyName] = useState(specialty.name);
-    const [specialtyPrice, setSpecialtyPrice] = useState(specialty.price);
-    const [specialtyDiscount, setSpecialtyDiscount] = useState(specialty.discount);
+
     const [description, setDescription] = useState(specialty.description);
     const [listType, setListType] = useState([]);
     const [errors, setErrors] = useState({
@@ -412,9 +359,7 @@ const ModalEditSpecialty = ({ isOpenEditSpecialty, setIsOpenEditSpecialty, speci
         const data = {
             id: specialty.id,
             name: specialtyName,
-            price: +specialtyPrice.replace(/\./g, "") || 0,
             description: description,
-            discount: specialtyDiscount,
         };
 
         //fetch data
@@ -452,42 +397,7 @@ const ModalEditSpecialty = ({ isOpenEditSpecialty, setIsOpenEditSpecialty, speci
                         />
                         <span className="text-red-300 text-sm absolute top-full">{errors.specialtyName}</span>
                     </div>
-                    <div className="flex gap-6 items-center">
-                        <div className="w-full">
-                            <div className="flex flex-col gap-2 relative mb-2">
-                                <label htmlFor="price_specialty" className="text-sm text-gray-600">
-                                    Giá khám
-                                </label>
-                                <input
-                                    type="text"
-                                    value={
-                                        specialtyPrice
-                                            .toString()
-                                            .replace(/\D/g, "")
-                                            .replace(/\B(?=(\d{3})+(?!\d))/g, ".") || ""
-                                    }
-                                    id="price_specialty"
-                                    className="border border-gray-300 rounded px-2 py-2 outline-none"
-                                    onChange={(e) => setSpecialtyPrice(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                        <div className="flex flex-col gap-2 relative">
-                            <label htmlFor="medicalPackage-discount" className="text-sm text-gray-600">
-                                Giảm giá (%)
-                            </label>
-                            <input
-                                id="medicalPackage-discount"
-                                type="number"
-                                min="0"
-                                max="100"
-                                step="1"
-                                defaultValue={specialtyDiscount}
-                                className="border border-gray-300 rounded px-2 py-2 outline-none"
-                                onChange={(e) => setSpecialtyDiscount(e.target.value)}
-                            />
-                        </div>
-                    </div>
+
                     <div className="flex flex-col gap-2 relative mb-2">
                         <label htmlFor="specialty-description" className="text-sm text-gray-600">
                             Mô tả

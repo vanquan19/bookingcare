@@ -106,6 +106,7 @@ const Login = () => {
         // if exist => redirect to back page
         if (response.isSuccess) {
             toast.success("Đăng nhập thành công");
+
             // save user info to local storage
             dispath(patientLogin(response));
             // redirect to back page

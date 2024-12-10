@@ -32,7 +32,7 @@ const ClinicManageContainer = () => {
     return (
         <div>
             <div className="flex">
-                <SidebarAdmin list={sidebarList} />
+                {/* <SidebarAdmin list={sidebarList} /> */}
                 <div className="w-full px-4">
                     <Outlet />
                 </div>

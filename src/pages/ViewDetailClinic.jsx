@@ -108,7 +108,10 @@ const ViewDetailClinic = () => {
                             loading="lazy"></iframe>
                     </div>
                 </div>
-                <div className="col-span-3 max-h-screen text-justify h-auto overflow-hidden overflow-y-scroll no-scrollbar" dangerouslySetInnerHTML={{ __html: clinic.content }} />
+                <div
+                    className="col-span-3 max-h-screen text-justify h-auto overflow-hidden overflow-y-scroll no-scrollbar bg-white p-4 rounded-lg"
+                    dangerouslySetInnerHTML={{ __html: clinic.content }}
+                />
             </div>
         </>
     );
