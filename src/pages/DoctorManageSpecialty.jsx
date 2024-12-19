@@ -273,7 +273,7 @@ const ModalAddNewSpecialty = ({ isOpenAddNewSpecialty, setIsOpenAddNewSpecialty,
             toast.error(response.message);
             return;
         }
-        toast.success("Thêm phòng khám thành công!");
+        toast.success("Thêm chuyên khoa thành công!");
         setIsOpenAddNewSpecialty(false);
         setTimeout(() => {
             setLoad(!load);
@@ -443,7 +443,7 @@ const ModalAlertDelete = ({ isOpenAlertDelete, setIsOpenAlertDelete, id, name, s
             return;
         }
         setIsOpenAlertDelete(false);
-        toast.success("Xóa phòng khám thành công!");
+        toast.success("Xóa chuyên khoa thành công!");
         setLoad(!load);
     };
 

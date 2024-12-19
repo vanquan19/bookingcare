@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -13,10 +13,11 @@ const firebaseConfig = {
     storageBucket: "otpphonebokingcare.firebasestorage.app",
     messagingSenderId: "943036797327",
     appId: "1:943036797327:web:69074e0fe6418d740ffbfa",
-    measurementId: "G-WRW1M8P43T",
-};
+    measurementId: "G-WRW1M8P43T"
+  };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
+auth.useDeviceLanguage();
 export { auth };

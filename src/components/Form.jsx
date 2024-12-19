@@ -54,9 +54,9 @@ const SearchInput = ({ value, onChange, className, name, placeholder, size = "xl
     }, [index, charIndex, adding]);
 
     return (
-        <div className="relative flex py-4 px-4">
-            <IoSearch className={`bg-white fill-gray-500 ${"rounded-l-" + rounded} size-auto pr-0 ${className}`} />
-            <input className={`outline-none ${"rounded-r-" + rounded} w-full  ${className} `} type="search" name={name} placeholder={text} value={value} onChange={onChange} />
+        <div className="relative flex pt-4 pb-1">
+            <IoSearch className={`bg-white fill-gray-500 ${"rounded-l-lg " + rounded} size-auto pr-0 ${className}`} />
+            <input className={`outline-none ${"rounded-r-lg " + rounded} w-full  ${className} `} type="search" name={name} placeholder={text} value={value} onChange={(e)=> onChange(e)} />
         </div>
     );
 };

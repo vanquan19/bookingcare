@@ -580,7 +580,7 @@ const ModalAlertDelete = ({ isOpenAlertDelete, setIsOpenAlertDelete, id, name, s
             return;
         }
         setIsOpenAlertDelete(false);
-        toast.success("Xóa phòng khám thành công!");
+        toast.success("Xóa gói khám thành công!");
         setLoad(!load);
     };
 

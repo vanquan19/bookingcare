@@ -4,8 +4,8 @@ import { CiViewBoard, CiCircleCheck, CiTrash } from "react-icons/ci";
 import { getData, setData } from "../utils/fetchData";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import socket from "../configs/socket.io";
 import { ModalViewPatient } from "./DoctorManagePatient";
+import socket from "../configs/socket.io";
 
 const RoleDoctorManagePatient = () => {
     const [showModalView, setShowModalView] = useState(false);
@@ -44,12 +44,30 @@ const RoleDoctorManagePatient = () => {
                     return;
                 }
                 setPatients(response.data);
+                if (status === 1 && user.data.position === "doctor") {
+                    await setData("/update-notify", "POST", { reciverId: user.data.clinicId }, null, user.accessToken);
+                }
             } catch (error) {
                 console.log(error);
             }
         };
         fetchPatients();
     }, [status, load]);
+    //socket on
+    useEffect(() => {
+        socket.on("new_booking", (data) => {
+            setLoad(!load);
+            console.log(data);
+        });
+        socket.on("cancel_booking", (data) => {
+            setLoad((prev) => !prev);
+            console.log(data);
+        });
+        return () => {
+            socket.off("new_booking");
+            socket.off("cancel_booking");
+        };
+    }, [socket]);
 
     //handle accept patient
     const handleAcceptPatient = async (patient) => {
@@ -62,6 +80,9 @@ const RoleDoctorManagePatient = () => {
                 {
                     id: patient.id,
                     status: status + 1,
+                    clinicId: user.data.clinicId,
+                    clinicName: user.data.clinicName,
+                    userId: patient.patientId,
                 },
                 null,
                 user.accessToken
@@ -72,7 +93,6 @@ const RoleDoctorManagePatient = () => {
             }
             setStatus(status + 1);
             toast.success(response.message);
-            socket.emit("accept-booking", { senderId: user.data.clinicId, reciverId: patient.patientId, senderName: user.data.clinicName });
         }
     };
 
@@ -82,19 +102,6 @@ const RoleDoctorManagePatient = () => {
         setShowModalRefuse(true);
         setTargetPatient(patient);
     };
-
-    useEffect(() => {
-        if (status === 1) {
-            socket.emit("view-bookings", { clinicId: user.data.clinicId });
-            console.log("view-notify");
-        }
-    }, [status, load]);
-
-    useEffect(() => {
-        socket.on(`new-booking-${user.data.clinicId}`, (data) => {
-            setLoad(!load);
-        });
-    }, [socket]);
 
     const handleViewPatient = (patient) => {
         setTargetPatient(patient);
@@ -165,7 +172,7 @@ const RoleDoctorManagePatient = () => {
                                                     <CiViewBoard className="fill-blue-200" />
                                                     Xem chi tiết
                                                 </button>
-                                                {status <= 3 && status >= 1 && (
+                                                {status <= 1 && (
                                                     <>
                                                         <button
                                                             onClick={() => handleAcceptPatient(patient)}
@@ -209,6 +216,10 @@ const ModalRefusePatient = ({ patient, show, setShow, setStatus }) => {
     const [message, setMessage] = useState("");
     const user = useSelector((state) => state.auth);
     const handleRefusePatient = async () => {
+        if (!message) {
+            toast.error("Vui lòng nhập lý do từ chối");
+            return;
+        }
         //handle delete patient
         const response = await setData(
             `/update-status-history-booking`,
@@ -216,6 +227,10 @@ const ModalRefusePatient = ({ patient, show, setShow, setStatus }) => {
             {
                 id: patient.id,
                 status: 5,
+                clinicId: user.data.clinicId,
+                clinicName: user.data.clinicName,
+                resson: message,
+                userId: patient.patientId,
             },
             null,
             user.accessToken
@@ -225,6 +240,7 @@ const ModalRefusePatient = ({ patient, show, setShow, setStatus }) => {
             return;
         }
         setStatus(5);
+        setShow(false);
         toast.success(response.message);
     };
     return (
@@ -232,6 +248,7 @@ const ModalRefusePatient = ({ patient, show, setShow, setStatus }) => {
             <div className="bg-white p-4 w-96 rounded-lg  animate-fadeIn transition-all">
                 <h1 className="text-xl font-medium">Lý do từ chối</h1>
                 <textarea onChange={(e) => setMessage(e.target.value)} className="w-full h-32 border border-gray-300 rounded-lg p-2 mt-2"></textarea>
+
                 <div className="flex gap-4 justify-end mt-4">
                     <button onClick={() => setShow(false)} className="px-4 py-2 bg-gray-200 rounded-lg text-gray-900 font-medium">
                         Hủy

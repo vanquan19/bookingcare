@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { BiClinic } from "react-icons/bi";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../features/authSlide";
 import logo from "../assets/images/header_logo.png";
+import socket from "../configs/socket.io";
 
 const initialNavigation = [
     // { name: "Phân tích", href: "/admin", current: true },
@@ -32,6 +33,7 @@ export const AdminNavbar = () => {
         }));
         setNavigation(updatedNavigation);
     }, [location.pathname]); // Runs every time the path changes
+
     return (
         <Disclosure as="nav" className="dark:bg-gray-800 bg-white shadow-sm fixed w-full z-10">
             <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -203,6 +205,10 @@ export const SidebarAdmin = (props) => {
 };
 
 const AdminContainer = () => {
+    const admin = useSelector((state) => state.auth.data);
+    useEffect(() => {
+        socket.emit("join_room", "admin");
+    }, [admin]);
     return (
         <div className="bg-bg-main">
             <AdminNavbar />

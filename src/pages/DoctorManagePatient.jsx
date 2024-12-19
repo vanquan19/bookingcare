@@ -34,6 +34,21 @@ const DoctorManagePatient = () => {
     }, [load, status]);
 
     useEffect(() => {
+        socket.on("new_booking", (data) => {
+            setLoad(!load);
+            console.log(data);
+        });
+        socket.on("cancel_booking", (data) => {
+            setLoad((prev) => !prev);
+            console.log(data);
+        });
+        return () => {
+            socket.off("new_booking");
+            socket.off("cancel_booking");
+        };
+    }, [socket]);
+
+    useEffect(() => {
         const fetchPatients = async () => {
             try {
                 const response = await getData(`/get-history-booking-by-status?status=${status}&clinicId=${user.data.clinicId}`, user.accessToken);
@@ -48,19 +63,6 @@ const DoctorManagePatient = () => {
         };
         fetchPatients();
     }, [status, load]);
-
-    useEffect(() => {
-        if (status === 1) {
-            socket.emit("view-bookings", { clinicId: user.data.clinicId });
-            console.log("view-notify");
-        }
-    }, [status, load]);
-
-    useEffect(() => {
-        socket.on(`new-booking-${user.data.clinicId}`, (data) => {
-            setLoad(!load);
-        });
-    }, [socket]);
 
     const handleViewPatient = (patient) => {
         setTargetPatient(patient);

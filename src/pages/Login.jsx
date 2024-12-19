@@ -12,16 +12,19 @@ import { useDispatch } from "react-redux";
 import { fetchUserRegister, patientLogin } from "../features/authSlide";
 
 const Login = () => {
-    const [phone, setPhone] = useState("");
+    const [phone, setPhone] = useState(""); // store phone number
     const [error, setError] = useState("");
     const [isOpenOTP, setIsOpenOTP] = useState(false);
-    const [OTP, setOTP] = useState([]);
+    const [OTP, setOTP] = useState([]);  // store OTP code
     const [loading, setLoading] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
     const [fullname, setFullname] = useState("");
     const [email, setEmail] = useState("");
     const [address, setAddress] = useState("");
     const dispath = useDispatch();
+
+    //state firebase
+ 
 
     const onRecaptchaVerify = () => {
         // Reset the RecaptchaVerifier if it exists and has expired
@@ -189,7 +192,7 @@ const Login = () => {
                                                     Đang xử lý...
                                                 </Button>
                                             ) : (
-                                                <Button size="md" type="submit" className="bg-primary-2 hover:bg-primary-3 transition-all text-white font-semibold">
+                                                <Button id="sign-in-btn" size="md" type="submit" className="bg-primary-2 hover:bg-primary-3 transition-all text-white font-semibold">
                                                     Gửi mã OTP
                                                 </Button>
                                             )}
@@ -311,7 +314,7 @@ const OTPField = ({ setValue }) => {
     return (
         <section className="bg-white dark:bg-dark w-full">
             <div className="container">
-                <form id="otp-form" className={`grid grid-cols-${length || 6} gap-2`}>
+                <form id="otp-form" className={`grid grid-cols-6 gap-2`}>
                     {otp.map((digit, index) => (
                         <input
                             key={index}

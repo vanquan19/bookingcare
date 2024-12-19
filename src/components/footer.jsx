@@ -1,6 +1,7 @@
+import { Link } from "react-router-dom";
 import logo from "../assets/images/header_logo.png";
 import { Item, List } from "./List";
-import { Heading3, Link } from "./Text";
+import { Heading3 } from "./Text";
 
 const Footer = () => {
     return (
@@ -28,40 +29,31 @@ const Footer = () => {
                 </div>
 
                 <div>
-                    <Heading3>Cơ sở y tế</Heading3>
+                    <Heading3>
+                        <Link to="/co-so-y-te">Cơ sở y tế</Link>
+                    </Heading3>
                     <ul className="text-black ">
                         <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Bệnh viện công</Link>
+                            <Link to="/benh-vien-cong">Bệnh viện công</Link>
                         </li>
                         <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Bệnh viện tư</Link>
+                            <Link to="/benh-vien-tu">Bệnh viện tư</Link>
                         </li>
                         <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Phòng khám</Link>
+                            <Link to="phong-kham">Phòng khám</Link>
                         </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Phòng mạch</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Xét nghiệm</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Y tế tại nhà</Link>
-                        </li>
-                        <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Tiêm chủng</Link>
-                        </li>
+
                     </ul>
                 </div>
                 <div>
                     <Heading3>Hướng dẫn</Heading3>
                     <ul className="text-black ">
                         <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Đặt lịch khám</Link>
+                            <Link to="/huong-dan/dat-lich-kham">Đặt lịch khám</Link>
                         </li>
 
                         <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link>Câu hỏi thường gặp</Link>
+                            <Link to="/huong-dan/hoi-dap">Câu hỏi thường gặp</Link>
                         </li>
                     </ul>
                 </div>
@@ -69,7 +61,7 @@ const Footer = () => {
                     <Heading3>Liên hệ hợp tác</Heading3>
                     <ul className="text-black ">
                         <li className="py-1 text-gray-500 hover:text-primary">
-                            <Link href="/lien-he-hop-tac">Tham gia Booking</Link>
+                            <Link to="/lien-he-hop-tac">Tham gia Booking</Link>
                         </li>
                     </ul>
                 </div>

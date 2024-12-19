@@ -17,7 +17,6 @@ import imgDoctor from "../assets/images/Icon_DatKhamTheoBacSi.webp";
 import { DatePicker } from "./DatePicker";
 import { useSelector } from "react-redux";
 import { AiOutlineRollback } from "react-icons/ai";
-import socket from "../configs/socket.io";
 
 export const Directory = () => {
     //page will be get from local storage
@@ -111,25 +110,25 @@ const OptionList = ({ title, children }) => {
             name: "Phòng khám",
             link: "/phong-kham",
         },
-        {
-            name: "Phòng mạch",
-            link: "/phong-mach",
-        },
-        {
-            name: "Xét nghiệm",
-            link: "/xet-nghiem",
-        },
-        {
-            name: "Y tế tại nhà",
-            link: "/y-te-tai-nha",
-        },
-        {
-            name: "Tiêm chủng",
-            link: "/tiem-chung",
-        },
+        // {
+        //     name: "Phòng mạch",
+        //     link: "/phong-mach",
+        // },
+        // {
+        //     name: "Xét nghiệm",
+        //     link: "/xet-nghiem",
+        // },
+        // {
+        //     name: "Y tế tại nhà",
+        //     link: "/y-te-tai-nha",
+        // },
+        // {
+        //     name: "Tiêm chủng",
+        //     link: "/tiem-chung",
+        // },
     ];
     return (
-        <ul className="flex justify-around border-t border-gray-300 py-4 bg-white px-16">
+        <ul className="flex justify-center gap-4 border-t border-gray-300 py-4 bg-white px-16">
             {options.map((option, index) => (
                 <Link key={index} to={option.link}>
                     <li key={index} className="py-2 px-4  bg-primary/10  text-primary-2  text-lg font-semibold rounded-full  ">
@@ -774,13 +773,6 @@ export const SelectPatientProfile = () => {
         fetchData();
     }, []);
 
-    const sentNotification = () => {
-        socket.emit("create-booking", {
-            message: "Bạn có lịch khám mới",
-            clinicId: data.clinicId,
-        });
-    };
-
     const handleSubmit = async () => {
         if (!data.profileId) {
             toast.error("Vui lòng chọn hồ sơ bệnh nhân");
@@ -791,7 +783,6 @@ export const SelectPatientProfile = () => {
             toast.error(response.message);
             return;
         }
-        sentNotification();
         toast.success(response.message);
         navigate("/lich-su-kham-benh?key=bills");
     };

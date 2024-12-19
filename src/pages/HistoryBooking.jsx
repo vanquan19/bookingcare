@@ -5,7 +5,7 @@ import { getData, setData } from "../utils/fetchData";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { FaBuilding, FaCalendar, FaDollarSign, FaIdCard, FaMailBulk, FaOpencart, FaTrashAlt, FaUserCircle, FaUserGraduate, FaUsers } from "react-icons/fa";
-import { CiEdit, CiTrash, CiViewBoard } from "react-icons/ci";
+import { CiEdit, CiMail, CiTrash, CiViewBoard } from "react-icons/ci";
 import { FaCakeCandles, FaMapPin, FaPhone } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
 import { apiGetDistrict, apiGetProvince, apiGetWard } from "../utils/location";
@@ -17,6 +17,7 @@ const HistoryBooking = () => {
     const [listPatientProfile, setListPatientProfile] = useState([]);
     const [listBills, setListBills] = useState([]);
     const [listAmount, setListAmount] = useState([]);
+    const [listNotify, setListNotify] = useState([]);
     const [load, setLoad] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const [targetProfile, setTargetProfile] = useState({});
@@ -71,6 +72,25 @@ const HistoryBooking = () => {
             fetchData();
             return;
         }
+        if (search.get("key") === "notify") {
+            const fetchData = async () => {
+                try {
+                    const response = await getData(`/get-notify?reciverId=${selector.data.id}&limit=20`);
+                    if (!response.isSuccess) {
+                        toast.error(response.message);
+                        return;
+                    }
+                    console.log(response.data);
+                    setListNotify(response.data);
+                    await setData("/update-notify", "POST", { reciverId: selector.data.id }, null, selector.accessToken);
+                } catch (error) {
+                    console.log(error);
+                    toast.error("Internal server error");
+                }
+            };
+            fetchData();
+            return;
+        }
     }, [location.search, load, status]);
 
     useEffect(() => {
@@ -93,6 +113,21 @@ const HistoryBooking = () => {
             return;
         }
     }, [location.search, key, load]);
+
+    useEffect(() => {
+        socket.on("confirm_booking", (data) => {
+            setLoad(!load);
+            console.log(data);
+        });
+        socket.on("refuse_booking", (data) => {
+            setLoad((prev) => !prev);
+            console.log(data);
+        });
+        return () => {
+            socket.off("confirm_booking");
+            socket.off("refuse_booking");
+        };
+    }, [socket]);
 
     const handleOpenModal = (profile) => {
         setTargetProfile(profile);
@@ -141,6 +176,14 @@ const HistoryBooking = () => {
                                 }`}>
                                 <Link to="/lich-su-kham-benh?key=bills" className="px-4 py-2 block">
                                     Phiếu khám bệnh
+                                </Link>
+                            </li>
+                            <li
+                                className={`text-lg font-medium rounded-lg min-w-96 hover:cursor-pointer border-transparent border-2 transition-all duration-300 hover:border-l-primary ${
+                                    key === "notify" ? "bg-gradient-to-r from-primary to-primary-2 text-white" : ""
+                                }`}>
+                                <Link to="/lich-su-kham-benh?key=notify" className="px-4 py-2 block">
+                                    Thông báo
                                 </Link>
                             </li>
                         </ul>
@@ -310,6 +353,36 @@ const HistoryBooking = () => {
                                 {openAlertDelete && <ModalAlertDelete open={openAlertDelete} setOpen={setOpenAlertDelete} profile={targetProfile} setLoad={setLoad} />}
                             </div>
                         )}
+                        {key === "notify" && (
+                            <div className="w-full ">
+                                <h1 className="font-semibold text-xl text-gray-800 mb-4">Thông báo</h1>
+
+                                <ul className="flex flex-col gap-4 min-h-72 h-full w-full mt-4">
+                                    {listNotify.length === 0 ? (
+                                        <div className="text-lg text-gray-500 text-center h-full w-full flex items-center justify-center">Không có thông báo nào</div>
+                                    ) : (
+                                        <>
+                                            {listNotify.map((item, index) => (
+                                                <li key={index} className="text-lg font-semibold w-full overflow-hidden py-2 bg-white rounded-lg flex items-center gap-2 px-4">
+                                                    <div className="relative">
+                                                        <CiMail className="size-10 fill-gray-500" />
+                                                        {item.isRead === 0 && <div className="absolute top-0 -right-1 w-3 h-3 bg-red-300 rounded-full"></div>}
+                                                    </div>
+
+                                                    <div className="flex flex-col mb-1 px-4">
+                                                        <span>{item.message}</span>
+                                                        <span className="font-normal text-base text-gray-700 flex items-center gap-2">
+                                                            <div className=" w-2 h-2 bg-green-400 rounded-full"></div>
+                                                            {new Intl.DateTimeFormat("vi-VN").format(new Date(item.createdAt))} {new Date(item.createdAt).toLocaleTimeString()}
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </>
+                                    )}
+                                </ul>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -464,17 +537,13 @@ const ModalCancelBills = ({ open, setOpen, profile, setLoad }) => {
     const handleCancelBills = async () => {
         if (!profile.id) return;
         console.log("Delete profile", profile.id);
-        const response = await setData("/update-status-history-booking", "POST", { id: profile.id, status: 0 }, null, selector.accessToken);
+        const response = await setData("/update-status-history-booking", "POST", { id: profile.id, status: 0, clinicId: profile.clinicId, fullname: profile.fullname }, null, selector.accessToken);
         if (!response.isSuccess) {
             toast.error(response.message);
             return;
         }
         setOpen(false);
         toast.success("Hủy phiếu khám thành công!");
-        socket.emit("create-booking", {
-            message: "Bạn có lịch khám mới",
-            clinicId: clinicId,
-        });
         setLoad((prev) => !prev);
     };
     return (

@@ -1,4 +1,4 @@
-const Button = ({ children, onClick, size = "sm", className, disable = false }) => {
+const Button = ({id, children, onClick, size = "sm", className, disable = false }) => {
     let sizeClass;
     switch (size) {
         case "sm":
@@ -20,6 +20,7 @@ const Button = ({ children, onClick, size = "sm", className, disable = false }) 
 
     return (
         <button
+            id={id}
             disabled={disable}
             onClick={onClick}
             className={`${sizeClass} flex items-center justify-center text-gray-700 h-fit font-semibold rounded border border-solid border-gray-400 ${className}`}>

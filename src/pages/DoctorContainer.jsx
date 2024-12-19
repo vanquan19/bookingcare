@@ -1,4 +1,4 @@
-import { Link, Navigate, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import logo from "../assets/images/header_logo.png";
 import { LuArrowLeftFromLine, LuBell, LuCalendar, LuLibrary, LuMessageCircle, LuPackage, LuPieChart, LuUser, LuUserPlus, LuUsers, LuUserX2 } from "react-icons/lu";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,42 +6,47 @@ import { logout } from "../features/authSlide";
 import { HomeIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import socket from "../configs/socket.io";
-import { CiBellOn } from "react-icons/ci";
+import { getData } from "../utils/fetchData";
 const DoctorContainer = () => {
-    const [newBooking, setNewBooking] = useState(0);
-    const [notifications, setNotifications] = useState([]);
+    const [newNotify, setNewNotify] = useState(0);
+    const [load, setLoad] = useState(false);
     const clinicName = useSelector((state) => state.auth.data.clinicName);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const handleLogout = () => {
         dispatch(logout());
-        Navigate("/doctor/login");
+        navigate("/doctor/login");
     };
     const clinicId = useSelector((state) => state.auth.data.clinicId);
     const user = useSelector((state) => state.auth.data);
-    console.log(user);
+    const getNotify = async () => {
+        const response = await getData(`/get-notify?reciverId=${user.clinicId}&limit=100`);
+        if (response.isSuccess) {
+            const newNotify = response.data.filter((item) => item.isRead === 0);
+            setNewNotify(newNotify.length);
+        }
+    };
+    useEffect(() => {
+        getNotify();
+    }, [user.clinicId, load]);
 
     useEffect(() => {
-        socket.on(`new-booking-${clinicId}`, (data) => {
-            setNewBooking(data.unRead);
-        });
-        socket.on(`reset-notifications-${clinicId}`, (data) => {
-            setNewBooking(data.unRead);
+        socket.emit("join_room", "clinic_" + clinicId);
+    }, [clinicId]);
+
+    useEffect(() => {
+        socket.on("new_booking", (data) => {
+            setLoad((prev) => !prev);
         });
     }, [socket]);
 
-    const displayNotification = ({ senderName, type, content }) => {
-        const action = type === "booking" ? "đã đặt lịch khám" : "đã hủy lịch khám";
-        return (
-            <div className="flex items-center p-2 space-x-2 bg-gray-100 rounded-lg dark:bg-gray-700">
-                <LuUserPlus className="w-8 h-8 text-blue-500" />
-                <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{senderName}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {action} {content}
-                    </p>
-                </div>
-            </div>
-        );
+    const handleNavPatientPage = () => {
+        setNewNotify(0);
+        if (user.position === "manager") {
+            navigate("/doctor/patient");
+        } else {
+            navigate("/doctor/patient-doctor");
+        }
     };
 
     return (
@@ -78,11 +83,13 @@ const DoctorContainer = () => {
                             </li> */}
 
                             <li>
-                                <Link to="/doctor/patient" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                <div
+                                    onClick={handleNavPatientPage}
+                                    className="flex items-center md:cursor-pointer p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                     <LuUsers className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                                     <span className="flex-1 ms-3 whitespace-nowrap">Quản lý bệnh nhân</span>
-                                    <span className="text-white bg-red-400 px-2 rounded-full animate-bounce">{newBooking ? newBooking : ""}</span>
-                                </Link>
+                                    {newNotify > 0 && <span className="text-white bg-red-400 px-2 rounded-full animate-bounce">{newNotify}</span>}
+                                </div>
                             </li>
                             <li>
                                 <Link to="/doctor/specialty" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
@@ -109,12 +116,6 @@ const DoctorContainer = () => {
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/doctor/notification" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                                    <LuBell className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-                                    <span className="flex-1 ms-3 whitespace-nowrap">Thông báo</span>
-                                </Link>
-                            </li>
-                            <li>
                                 <button onClick={() => handleLogout()} className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                     <LuArrowLeftFromLine className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                                     <span className="flex-1 ms-3 whitespace-nowrap">Đăng xuất</span>
@@ -132,10 +133,13 @@ const DoctorContainer = () => {
                         </a>
                         <ul className="space-y-2 font-medium">
                             <li>
-                                <Link to="/doctor/patient-doctor" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                                <div
+                                    onClick={handleNavPatientPage}
+                                    className="flex items-center md:cursor-pointer p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                                     <LuUsers className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                                     <span className="ms-3">Quản lý bệnh nhân</span>
-                                </Link>
+                                    {newNotify > 0 && <span className="text-white bg-red-400 px-2 rounded-full animate-bounce">{newNotify}</span>}
+                                </div>
                             </li>
                             <li>
                                 <Link to="/doctor/schedule" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">

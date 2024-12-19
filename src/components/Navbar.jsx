@@ -3,7 +3,6 @@ import { Button, GroupButton } from "./Button";
 import { VscTriangleDown } from "react-icons/vsc";
 import { FaFacebookF, FaYoutube, FaUser, FaRegBell } from "react-icons/fa";
 import { AiFillInstagram } from "react-icons/ai";
-import { IoPhonePortraitOutline } from "react-icons/io5";
 import { IoIosCall } from "react-icons/io";
 import { useEffect, useState } from "react";
 import { Item, List } from "./List";
@@ -12,19 +11,22 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { BsFileEarmarkTextFill } from "react-icons/bs";
 import { RiFileList2Line } from "react-icons/ri";
-import { CiLogout } from "react-icons/ci";
+import { CiLogout, CiMail } from "react-icons/ci";
 import { logout } from "../features/authSlide";
+import { getData } from "../utils/fetchData";
 import socket from "../configs/socket.io";
 
 const Navbar = () => {
     //state for navbar sticky
     const [scroll, setScroll] = useState(false);
+    const [load, setLoad] = useState(false);
     const user = useSelector((state) => state.auth.data);
     const username = user.name || "";
     const dispath = useDispatch();
-    const { navigate } = useNavigate();
+    const navigate = useNavigate();
     const [isShow, setIsShow] = useState(false);
     const [notify, setNotify] = useState([]);
+    const [newNotify, setNewNotify] = useState(0);
     //handle navbar sticky
     useEffect(() => {
         let lastScrollY = window.scrollY;
@@ -46,26 +48,42 @@ const Navbar = () => {
         };
     }, []);
 
+    const getNotify = async () => {
+        const response = await getData(`/get-notify?reciverId=${user.id}&limit=5`);
+        if (response.isSuccess) {
+            setNotify(response.data);
+            const newNotify = response.data.filter((item) => item.isRead === 0);
+            setNewNotify(newNotify.length);
+        }
+    };
     useEffect(() => {
-        const event = `recive-notify-accept-${user.id}`;
+        getNotify();
+    }, [user.id, load]);
 
-        const handleNotify = (data) => {
-            setNotify((prev) => [...prev, data]);
-        };
-
-        // Đăng ký sự kiện
-        socket.on(event, handleNotify);
-
+    useEffect(() => {
+        socket.on("confirm_booking", (data) => {
+            setLoad((prev) => !prev);
+            console.log(data);
+        });
+        socket.on("refuse_booking", (data) => {
+            setLoad((prev) => !prev);
+            console.log(data);
+        });
         return () => {
-            socket.off(event, handleNotify);
+            socket.off("confirm_booking");
+            socket.off("refuse_booking");
         };
-    }, [socket, user.id]);
+    }, [socket]);
 
     const hanldeLogout = () => {
         dispath(logout());
         navigate("/");
     };
-    console.log(notify);
+    const hanldeViewNotify = async () => {
+        setNotify((prev) => prev.map((item) => ({ ...item, isRead: 1 })));
+        setNewNotify(0);
+        navigate("/lich-su-kham-benh?key=notify");
+    };
 
     return (
         <nav className={`${scroll ? "left-0 max-h-16" : "max-h-32 "} fixed top-0 z-40 w-full bg-white flex shadow-md transition-all`}>
@@ -103,27 +121,43 @@ const Navbar = () => {
                         </li>
                     </ul>
                     <GroupButton>
-                        <div className="flex relative group">
-                            <button className="p-2 mr-4 relative">
-                                <FaRegBell size={20} className="text-primary" />
-                                {notify.length > 0 && (
-                                    <span className="absolute top-0 -right-1 bg-red-300 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-semibold">{notify.length}</span>
-                                )}
-                            </button>
-                            <div className="p-4 right-0 absolute top-full bg-white shadow-md rounded-lg z-40 group-hover:flex group-hover:flex-col gap-2 items-center hidden animate-fadeIn min-w-64">
-                                {notify.length > 0 ? (
-                                    notify.map((item, index) => (
-                                        <div key={index} className="flex min-w-96  pb-2 border-b border-gray-400">
-                                            <h3 className="font-medium w-full line-clamp-2">
-                                                {item.senderName} <span className="lowercase font-normal">thông báo {item.message}</span>
-                                            </h3>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="flex text-gray-500 font-medium text-md justify-center h-full w-full min-h-32 items-center">Không có thông báo mới</div>
-                                )}
+                        {user.id && (
+                            <div className="flex relative group">
+                                <button className="p-2 mr-4 relative">
+                                    <FaRegBell size={20} className="text-primary" />
+                                    {newNotify > 0 && (
+                                        <span className="absolute top-0 -right-1 bg-red-300 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-semibold">{newNotify}</span>
+                                    )}
+                                </button>
+                                <div className="p-4 right-0 absolute top-full bg-white shadow-md rounded-lg z-40 group-hover:flex group-hover:flex-col items-center hidden animate-fadeIn min-w-64">
+                                    {notify.length > 0 ? (
+                                        <>
+                                            {notify.map((item, index) => (
+                                                <div key={index} className="text-base font-semibold w-full overflow-hidden bg-white rounded-lg flex items-center gap-2 px-4 border-b border-gray-300">
+                                                    <div className="relative">
+                                                        <CiMail className="size-7 fill-gray-500" />
+                                                        {item.isRead === 0 && <div className="absolute top-0 -right-1 w-3 h-3 bg-red-300 rounded-full"></div>}
+                                                    </div>
+
+                                                    <div className="flex flex-col mb-1 px-4">
+                                                        <span className="line-clamp-1">{item.message}</span>
+                                                        <span className="font-normal text-base text-gray-700 flex items-center gap-2 whitespace-nowrap">
+                                                            <div className=" w-2 h-2 bg-green-400 rounded-full"></div>
+                                                            {new Intl.DateTimeFormat("vi-VN").format(new Date(item.createdAt))} {new Date(item.createdAt).toLocaleTimeString()}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <button onClick={hanldeViewNotify} className="font-medium text-primary hover:text-primary-2 border-t border-gray-300 py-2 px-4 w-full text-center">
+                                                Xem tất cả
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <div className="flex text-gray-500 font-medium text-md justify-center h-full w-full min-h-32 items-center">Không có thông báo mới</div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
                         {!username ? (
                             <Link to="/login">
                                 <Button className="gap-2 rounded-full px-6 border-primary text-primary font-semibold hover:bg-gradient-to-r hover:from-primary-2 hover:to-primary hover:text-white transition-all group">
@@ -164,6 +198,14 @@ const Navbar = () => {
                                                 Phiếu khám bệnh
                                             </Link>
                                         </li>
+                                        <li>
+                                            <Link
+                                                to="/lich-su-kham-benh?key=notify"
+                                                className="py-2 px-4 hover:bg-gray-200 transition-all text-base font-medium rounded-lg flex items-center gap-2 group hover:text-primary">
+                                                <FaRegBell className="group-hover:animate-bounce group-hover:fill-primary  transition-all" />
+                                                Thông báo
+                                            </Link>
+                                        </li>
                                         <li className="border-y border-y-gray-500">
                                             <button
                                                 onClick={hanldeLogout}
@@ -202,18 +244,6 @@ const Navbar = () => {
                                     </Item>
                                     <Item>
                                         <Link to="/phong-kham">Phòng khám</Link>
-                                    </Item>
-                                    <Item>
-                                        <Link to="/phong-mach">Phòng mạch</Link>
-                                    </Item>
-                                    <Item>
-                                        <Link to="/xet-nghiem">Xét nghiệm</Link>
-                                    </Item>
-                                    <Item>
-                                        <Link to="/y-te-tai-nha">Y Tế tại nhà</Link>
-                                    </Item>
-                                    <Item>
-                                        <Link to="/tiem-chung">Tiêm chủng</Link>
                                     </Item>
                                 </List>
                             </div>

@@ -297,8 +297,8 @@ const AddNewProfilePatient = () => {
                                     className="py-2 px-4 pe-9 block w-full outline-none rounded-lg text-base border border-gray-400 focus:border-green-300 focus:ring-green-500 disabled:opacity-50 disabled:pointer-events-none ">
                                     <option value="">--chọn tỉnh/TP--</option>
                                     {listProvince?.map((province) => (
-                                        <option key={province["province_id"]} value={province["province_id"]}>
-                                            {province["province_name"]}
+                                        <option key={province["id"]} value={province["id"]}>
+                                            {province["name"]}
                                         </option>
                                     ))}
                                 </select>
@@ -320,8 +320,8 @@ const AddNewProfilePatient = () => {
                                     className="py-2 px-4 pe-9 block w-full outline-none rounded-lg text-base border border-gray-400 focus:border-green-300 focus:ring-green-500 disabled:opacity-50 disabled:pointer-events-none ">
                                     <option value="">--chọn quận/huyện--</option>
                                     {listDistrict?.map((district) => (
-                                        <option key={district["district_id"]} value={district["district_id"]}>
-                                            {district["district_name"]}
+                                        <option key={district["id"]} value={district["id"]}>
+                                            {district["name"]}
                                         </option>
                                     ))}
                                 </select>
@@ -345,8 +345,8 @@ const AddNewProfilePatient = () => {
                                     className="py-2 px-4 pe-9 block w-full outline-none rounded-lg text-base border border-gray-400 focus:border-green-300 focus:ring-green-500 disabled:opacity-50 disabled:pointer-events-none ">
                                     <option value="">--Phường/xã--</option>
                                     {listWard?.map((ward) => (
-                                        <option key={ward["ward_id"]} value={ward["ward_id"]}>
-                                            {ward["ward_name"]}
+                                        <option key={ward["id"]} value={ward["id"]}>
+                                            {ward["name"]}
                                         </option>
                                     ))}
                                 </select>

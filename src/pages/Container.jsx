@@ -3,10 +3,16 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { CiMail } from "react-icons/ci";
 import { FaPhoneAlt } from "react-icons/fa";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "../components/Form";
+import socket from "../configs/socket.io";
+import { useSelector } from "react-redux";
 const Container = () => {
     const [show, setShow] = useState(false);
+    const user = useSelector((state) => state.auth.data);
+    useEffect(() => {
+        socket.emit("join_room", "user_" + user.id);
+    }, [user]);
     return (
         <div className="bg-bg-main">
             <header>
