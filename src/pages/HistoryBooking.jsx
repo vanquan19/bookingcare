@@ -144,6 +144,16 @@ const HistoryBooking = () => {
         setOpenModalCancelBills(true);
     };
 
+    const isCancelable = (time, date, month, year) => {
+        const currentDate = new Date();
+        const bookingDate = new Date(year, month - 1, date, time.split(":")[0]);
+        
+        if (bookingDate.getTime() - currentDate.getTime() > 60 * 60 * 1000) {
+            return true;
+        }
+        return false;
+    };
+
     return (
         <>
             <div className="mt-32 lg:px-32 py-8">
@@ -332,7 +342,7 @@ const HistoryBooking = () => {
                                                         <span className="text-base text-gray-900 font-medium">{item.doctorId && item.doctor.firstname + " " + item.doctor.lastname}</span>
                                                     </div>
                                                     <div className="flex items-center gap-4 p-2 bg-[#f5f5f5] justify-end ">
-                                                        {status === 1 && (
+                                                        {isCancelable(item.time, item.date, item.month, item.year) && status <= 2 && status >=1  && (
                                                             <button onClick={() => handleOpenModalCalcel(item)} className="flex gap-1 items-center text-base text-red-300 py-1 px-3 rounded-lg">
                                                                 <CiTrash className="w-5 h-5 fill-red-300" />
                                                                 Hủy phiếu khám
