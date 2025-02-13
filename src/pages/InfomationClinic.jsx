@@ -25,7 +25,7 @@ const InfomationClinic = () => {
 
     return (
         <div>
-            <div onDoubleClick={() => setShow(true)} dangerouslySetInnerHTML={{ __html: clinic.content }} className="set_innerHTML" />
+            <div onDoubleClick={() => setShow(true)} dangerouslySetInnerHTML={{ __html: clinic.content || <span>Vui lòng thêm mô tả.</span> }} className="set_innerHTML" />
             {show && <ModalUpdateContent clinic={clinic} setShow={setShow} load={load} setLoad={setLoad} />}
         </div>
     );

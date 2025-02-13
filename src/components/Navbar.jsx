@@ -184,7 +184,7 @@ const Navbar = () => {
                                     <ul className="mt-2">
                                         <li>
                                             <Link
-                                                to="/lich-su-kham-benh?key=recoreds"
+                                                to="/lich-su-kham-benh?key=records"
                                                 className="py-2 px-4 hover:bg-gray-200 transition-all text-base font-medium rounded-lg flex items-center gap-2 group hover:text-primary">
                                                 <BsFileEarmarkTextFill className="group-hover:animate-bounce group-hover:fill-primary  transition-all" />
                                                 Hồ sơ bệnh nhân

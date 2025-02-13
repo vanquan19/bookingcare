@@ -16,7 +16,7 @@ const DoctorLogin = () => {
             const resultAction = await dispatch(fetchUserLogin({ username, password, role: "doctor" })).unwrap();
             if (resultAction.isSuccess) {
                 console.log("Login success");
-                navigate("/doctor/patient");
+                resultAction.data.position === "manager" ? navigate("/doctor/patient") : navigate("/doctor/patient-doctor");
             } else {
                 console.log("Login failed");
                 toast.error(resultAction.message);

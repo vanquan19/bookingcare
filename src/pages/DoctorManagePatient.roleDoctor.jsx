@@ -172,21 +172,20 @@ const RoleDoctorManagePatient = () => {
                                                     <CiViewBoard className="fill-blue-200" />
                                                     Xem chi tiết
                                                 </button>
-                                                {status >= 1 && status <=3 && (
+                                                {status >= 1 && status <= 3 && (
                                                     <>
                                                         <button
                                                             onClick={() => handleAcceptPatient(patient)}
                                                             className="text-green-400 px-2 py-1 hover:bg-gray-200 outline-none rounded flex items-center gap-3 justify-start whitespace-nowrap">
                                                             <CiCircleCheck className="fill-green-400" /> Xác nhận
                                                         </button>
-                                                        {status === 1 && (
-                                                            
-                                                        <button
-                                                            onClick={() => handleRefusepatient(patient)}
-                                                            className="text-red-300 px-2 py-1 hover:bg-gray-200 outline-none rounded flex items-center gap-3 justify-start">
-                                                            <CiTrash className="fill-red-300" />
-                                                            Từ chối
-                                                        </button>
+                                                        {status == 1 && (
+                                                            <button
+                                                                onClick={() => handleRefusepatient(patient)}
+                                                                className="text-red-300 px-2 py-1 hover:bg-gray-200 outline-none rounded flex items-center gap-3 justify-start">
+                                                                <CiTrash className="fill-red-300" />
+                                                                Từ chối
+                                                            </button>
                                                         )}
                                                     </>
                                                 )}

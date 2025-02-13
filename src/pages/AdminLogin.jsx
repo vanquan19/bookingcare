@@ -16,7 +16,7 @@ const AdminLogin = () => {
             const resultAction = await dispatch(fetchUserLogin({ username, password, role: "admin" })).unwrap();
             if (resultAction.isSuccess) {
                 console.log("Login success");
-                navigate("/admin");
+                navigate("/admin/clinic-management");
             } else {
                 toast.error("Tài khoản hoặc mật khẩu không đúng!");
                 console.log("Login failed");

@@ -15,7 +15,7 @@ const Login = () => {
     const [phone, setPhone] = useState(""); // store phone number
     const [error, setError] = useState("");
     const [isOpenOTP, setIsOpenOTP] = useState(false);
-    const [OTP, setOTP] = useState([]);  // store OTP code
+    const [OTP, setOTP] = useState([]); // store OTP code
     const [loading, setLoading] = useState(false);
     const [showModalRegister, setShowModalRegister] = useState(false);
     const [fullname, setFullname] = useState("");
@@ -24,7 +24,6 @@ const Login = () => {
     const dispath = useDispatch();
 
     //state firebase
- 
 
     const onRecaptchaVerify = () => {
         // Reset the RecaptchaVerifier if it exists and has expired
@@ -200,7 +199,7 @@ const Login = () => {
                                     )}
                                 </GroupButton>
                             </GroupItem>
-                            <GroupButton className="flex-col text-center">
+                            {/* <GroupButton className="flex-col text-center">
                                 Hoặc đăng nhập bằng tài khoản
                                 <Button
                                     type="button"
@@ -211,7 +210,7 @@ const Login = () => {
                                 <Button type="button" className="bg-gradient-to-r from-blue-300 to-blue-200 border-none hover:from-blue-400 hover:to-blue-300 text-white transition-all" size="2ms">
                                     Đăng nhập với Facebook
                                 </Button>
-                            </GroupButton>
+                            </GroupButton> */}
                         </Form>
                     </div>
                 </div>

@@ -83,6 +83,7 @@ export const Clinicmanagement = () => {
                 console.log(response.message);
                 return;
             }
+
             setTotalPages(response.totalPages);
             setRowData(response.data);
         };
@@ -101,11 +102,11 @@ export const Clinicmanagement = () => {
     const handlePublish = async (e, clinic) => {
         const accessToken = auth.accessToken;
         const response = await setData(`/clinic/set-public`, "POST", { id: clinic.id, isPublic: e.target.checked }, null, accessToken);
-        if (!response.success) {
+        if (!response.isSuccess) {
             console.log(response.message);
             return;
         }
-        setLoad(!load);
+        setLoad((prev) => !prev);
     };
 
     const handleEditClinic = (clinic) => {
@@ -386,7 +387,7 @@ const ModalAddNewClinic = ({ isOpenAddNewClinic, setIsOpenAddNewNlinic, load, se
         console.log(selector.accessToken);
 
         const response = await setData("/clinic/create", "POST", data, "application/json", selector.accessToken);
-        if (!response.success) {
+        if (!response.isSuccess) {
             toast.error(response.message);
             return;
         }

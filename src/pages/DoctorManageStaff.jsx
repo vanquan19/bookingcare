@@ -438,7 +438,7 @@ const ModalAddNewDoctor = ({ isOpenAddNewDoctor, setIsOpenAddNewDoctor, load, se
                                     name="doctor-specialty"
                                     id="Doctor-specialty"
                                     className="border border-gray-300 rounded px-2 py-2 outline-none ">
-                                    <option value="">--Chọn chức vụ--</option>
+                                    <option value="">--Chọn chuyên khoa--</option>
                                     {listSpecialize.map((item, index) => (
                                         <option key={index} value={item.id}>
                                             {item.name}
@@ -705,7 +705,7 @@ const ModalEditDoctor = ({ isOpenEditDoctor, setIsOpenEditDoctor, Doctor, setRow
                                     name="doctor-specialty"
                                     id="Doctor-specialty"
                                     className="border border-gray-300 rounded px-2 py-2 outline-none ">
-                                    <option value="">--Chọn chức vụ--</option>
+                                    <option value="">--Chọn chuyên khoa--</option>
                                     {listSpecialize.map((item, index) => (
                                         <option key={index} value={item.id}>
                                             {item.name}

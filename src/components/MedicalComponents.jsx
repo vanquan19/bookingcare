@@ -340,7 +340,7 @@ export const MedicalBookingForm = (props) => {
                         <Link to={`/dat-kham-theo-goi-kham?id=${clinicId}`}>
                             <div className="bg-white p-4 rounded-md text-base font-semibold text-gray-700 flex items-center gap-4">
                                 <img src={imgMedicalPackage} alt="logo goi kham" className="h-10 w-10" />
-                                Đặt khám theo goi khám
+                                Đặt khám theo gói khám
                             </div>
                         </Link>
                     )}
@@ -685,6 +685,7 @@ export const PickerDate = () => {
     const { handleUpdateData, data } = useOutletContext();
     const navigate = useNavigate();
     const [isOpenPickerTime, setIsOpenPickerTime] = useState(false);
+    const [listTime, setListTime] = useState(["8:00 - 9:30", "10:00 - 11:30", "14:00 - 15:30", "16:00 - 17:30"]);
 
     useEffect(() => {
         if (data.date) {
@@ -702,6 +703,9 @@ export const PickerDate = () => {
             <h2 className="text-center bg-primary p-3 text-xl font-semibold text-white">Vui lòng chọn lịch khám</h2>
             <div className="p-4 pt-0 flex flex-col ">
                 <DatePicker
+                    clinicId={data.clinicId}
+                    doctorId={data.doctorId}
+                    setListTime={setListTime}
                     onPicker={(datePicker) =>
                         handleUpdateData({
                             date: datePicker.date(),
@@ -713,39 +717,21 @@ export const PickerDate = () => {
                 {isOpenPickerTime && (
                     <div className="p-4 pt-0 flex flex-col ">
                         <h2 className="font-normal text-lg text-primary">
-                            Ngày khám đã chọn:{" "}
-                            <span className="font-normal text-base">
-                                {data.date}/{data.month + 1}/{data.year}
-                            </span>
+                            Ngày khám đã chọn: <span className="font-normal text-base">{listTime.length < 1 ? "Vui lòng chọn ngày khám." : `${data.date}/${data.month + 1}/${data.year}`}</span>
                         </h2>
                         <hr className="my-4 bg-gray-400 h-[2px]" />
                         <div>
-                            <h2 className="text-xl font-bold text-primary text-center">Chọn giờ khám</h2>
-                            <h2 className="text-lg font-medium text-gray-700 my-2">Sáng</h2>
+                            <h2 className="text-xl font-bold text-primary text-center mb-4">Chọn giờ khám</h2>
+
                             <div className="flex gap-2">
-                                <button
-                                    onClick={(e) => handleChoseTime(e.target.innerText)}
-                                    className="px-3 py-2 border border-orange-200 rounded hover:bg-orange-100 hover:text-white transition-all duration-200 font-medium">
-                                    8:00 - 9:30
-                                </button>
-                                <button
-                                    onClick={(e) => handleChoseTime(e.target.innerText)}
-                                    className="px-3 py-2 border border-orange-200 rounded hover:bg-orange-100 hover:text-white transition-all duration-200 font-medium">
-                                    10:00 - 11:30
-                                </button>
-                            </div>
-                            <h2 className="text-lg font-medium text-gray-700 my-2">Chiều</h2>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={(e) => handleChoseTime(e.target.innerText)}
-                                    className="px-3 py-2 border border-orange-200 rounded hover:bg-orange-100 hover:text-white transition-all duration-200 font-medium">
-                                    14:00 - 15:30
-                                </button>
-                                <button
-                                    onClick={(e) => handleChoseTime(e.target.innerText)}
-                                    className="px-3 py-2 border border-orange-200 rounded hover:bg-orange-100 hover:text-white transition-all duration-200 font-medium">
-                                    16:00 - 17:30
-                                </button>
+                                {listTime.map((time, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={(e) => handleChoseTime(e.target.innerText)}
+                                        className="px-3 py-2 border border-orange-200 rounded hover:bg-orange-100 hover:text-white transition-all duration-200 font-medium">
+                                        {time}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -763,7 +749,7 @@ export const SelectPatientProfile = () => {
     const token = useSelector((state) => state.auth.accessToken);
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getData(`/get-patient-profile`, token);
+            const response = await getData(`/get-patient-profile?date=${data.date}&month${data.month}&year=${data.year}`, token);
             if (!response.isSuccess) {
                 toast.error(response.message);
                 return;
@@ -813,7 +799,7 @@ export const SelectPatientProfile = () => {
                                     </div>
                                 </div>
                             </label>
-                            <input id={profile.id} type="radio" className="mr-4 size-5" onChange={() => handleUpdateData({ profileId: profile.id })} />
+                            <input id={profile.id} type="radio" name="profile" className="mr-4 size-5" onChange={() => handleUpdateData({ profileId: profile.id })} />
                         </li>
                     ))}
                 </ul>

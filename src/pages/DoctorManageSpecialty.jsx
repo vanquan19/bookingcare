@@ -114,8 +114,7 @@ const DoctorManageSpecialty = () => {
                                     onChange={(e) => setSort(e.target.value)}
                                     className="w-full bg-transparent placeholder:text-slate-400 text-gray-500 text-base border border-gray-300 rounded pl-9 pr-8 py-2 transition duration-300 ease focus:outline-none focus:border-gray-300 hover:border-gray-300 appearance-none cursor-pointer">
                                     <option value="createdAt">Sắp xếp theo ngày</option>
-                                    <option value="name">Sắp xếp theo tên khám</option>
-                                    <option value="price">Sắp xếp theo giá khám</option>
+                                    <option value="name">Sắp xếp theo tên khám chuyên khoa</option>
                                 </select>
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -265,9 +264,6 @@ const ModalAddNewSpecialty = ({ isOpenAddNewSpecialty, setIsOpenAddNewSpecialty,
             description: description,
         };
 
-        //fetch data
-        console.log(selector.accessToken);
-
         const response = await setData("/clinic/specialty/create", "POST", data, "application/json", selector.accessToken);
         if (!response.isSuccess) {
             toast.error(response.message);
@@ -350,7 +346,7 @@ const ModalEditSpecialty = ({ isOpenEditSpecialty, setIsOpenEditSpecialty, speci
             return;
         }
 
-        if (specialtyName === specialty.name && specialtyPrice === specialty.price && description === specialty.description && specialtyDiscount === specialty.discount) {
+        if (specialtyName === specialty.name && description === specialty.description) {
             toast.info("Không có gì thay đổi!");
             setIsOpenEditSpecialty(false);
             return;
@@ -361,6 +357,7 @@ const ModalEditSpecialty = ({ isOpenEditSpecialty, setIsOpenEditSpecialty, speci
             name: specialtyName,
             description: description,
         };
+        console.log(data);
 
         //fetch data
         const response = await setData("/clinic/specialty/update", "PUT", data, "application/json", selector.accessToken);
@@ -382,7 +379,7 @@ const ModalEditSpecialty = ({ isOpenEditSpecialty, setIsOpenEditSpecialty, speci
     return (
         <div className="fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60  backdrop-blur-sm transition-opacity duration-300">
             <div className={`relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm ${isOpenEditSpecialty ? "animate-fadeIn" : "animate-fadeOut"} transition-all duration-300`}>
-                <div className="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800">Thêm phòng khám</div>
+                <div className="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800">Sửa phòng khám</div>
                 <form action="" className="flex flex-col gap-4 max-h-96 overflow-y-scroll no-scrollbar ">
                     <div className="flex flex-col gap-2 relative mb-5">
                         <label htmlFor="specialty-name" className="text-sm text-gray-600">
@@ -408,6 +405,7 @@ const ModalEditSpecialty = ({ isOpenEditSpecialty, setIsOpenEditSpecialty, speci
                             cols="30"
                             rows="10"
                             className="border border-gray-300 rounded px-2 py-2 outline-none"
+                            defaultValue={description}
                             onChange={(e) => setDescription(e.target.value)}></textarea>
                     </div>
                 </form>

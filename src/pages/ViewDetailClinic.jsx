@@ -109,7 +109,7 @@ const ViewDetailClinic = () => {
                     </div>
                 </div>
                 <div
-                    className="col-span-3 max-h-screen text-justify h-auto overflow-hidden overflow-y-scroll no-scrollbar bg-white p-4 rounded-lg"
+                    className="col-span-3 max-h-screen text-justify h-auto overflow-hidden overflow-y-scroll no-scrollbar bg-white p-4 rounded-lg set_innerHTML"
                     dangerouslySetInnerHTML={{ __html: clinic.content }}
                 />
             </div>
